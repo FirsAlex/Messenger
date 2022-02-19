@@ -76,7 +76,7 @@ class ChatsUserController: UITableViewController {
                 
                 if contact.myUser == nil {
                     //GET
-                    sql.sendRequest(myUrlRoute: "by_telephone/" + telephone, httpMethod: "GET") { response in
+                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { response in
                         guard response == nil else {
                             contact.myUser = User(id: response?["id"] as? String, telephone: telephone,
                                                   name: response?["name"] as? String ?? "")
