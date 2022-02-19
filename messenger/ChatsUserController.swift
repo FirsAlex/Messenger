@@ -77,7 +77,7 @@ class ChatsUserController: UITableViewController {
                 if contact.myUser == nil {
                     //GET
                     sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { responseJson, response in
-                        guard response?.textEncodingName == "404" else {
+                        guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 else {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
                             print("Найдена учётка в БД с таким же номером телефона!")
@@ -85,7 +85,7 @@ class ChatsUserController: UITableViewController {
                         }
                         //POST
                         sql.sendRequest(myUrlRoute: "users", json: ["name":name, "telephone":telephone], httpMethod: "POST") { responseJson, response in
-                            guard response?.textEncodingName != "202" else {
+                            guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode == 200 else {
                                 print("Не удалось создать запись в таблице пользователей!")
                                 return
                             }
@@ -97,7 +97,7 @@ class ChatsUserController: UITableViewController {
                     //PATCH
                     sql.sendRequest(myUrlRoute: "users/"+(contact.myUser!.id ?? ""),
                                     json: ["name":name, "telephone":telephone], httpMethod: "PATCH"){ responseJson, response in
-                        guard response?.textEncodingName != "202" else {
+                        guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode == 200 else {
                             print("Не удалось обновить запись в таблице пользователей!")
                             return
                         }
