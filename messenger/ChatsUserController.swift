@@ -76,28 +76,28 @@ class ChatsUserController: UITableViewController {
                 
                 if contact.myUser == nil {
                     //GET
-                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { response in
-                        guard response == nil else {
-                            contact.myUser = User(id: response?["id"] as? String, telephone: telephone,
-                                                  name: response?["name"] as? String ?? "")
+                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { responseJson, response in
+                        guard response?.textEncodingName == "404" else {
+                            contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
+                                                  name: responseJson?["name"] as? String ?? "")
                             print("Найдена учётка в БД с таким же номером телефона!")
                             return
                         }
                         //POST
-                        sql.sendRequest(myUrlRoute: "users", json: ["name":name, "telephone":telephone], httpMethod: "POST") { response in
-                            guard response != nil else {
+                        sql.sendRequest(myUrlRoute: "users", json: ["name":name, "telephone":telephone], httpMethod: "POST") { responseJson, response in
+                            guard response?.textEncodingName != "202" else {
                                 print("Не удалось создать запись в таблице пользователей!")
                                 return
                             }
-                            contact.myUser = User(id: response?["id"] as? String, telephone: telephone, name: name)
+                            contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone, name: name)
                         }
                     }
                 }
                 else {
                     //PATCH
                     sql.sendRequest(myUrlRoute: "users/"+(contact.myUser!.id ?? ""),
-                                    json: ["name":name, "telephone":telephone], httpMethod: "PATCH"){ response in
-                        guard response != nil else {
+                                    json: ["name":name, "telephone":telephone], httpMethod: "PATCH"){ responseJson, response in
+                        guard response?.textEncodingName != "202" else {
                             print("Не удалось обновить запись в таблице пользователей!")
                             return
                         }

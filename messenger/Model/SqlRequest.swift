@@ -9,7 +9,7 @@ import Foundation
 
 protocol SqlRequestProtocol {
     func sendRequest(myUrlRoute: String, json: [String: Any], httpMethod: String,
-                     completion: @escaping ([String:Any]?) -> Void)
+                     completion: @escaping ([String:Any]?, URLResponse?) -> Void)
 }
 
 class SqlRequest: SqlRequestProtocol{
@@ -17,7 +17,7 @@ class SqlRequest: SqlRequestProtocol{
     }
     
     func sendRequest(myUrlRoute: String = "", json: [String: Any] = [:], httpMethod: String,
-                     completion: @escaping ([String:Any]?) -> Void) {
+                     completion: @escaping ([String:Any]?, URLResponse?) -> Void) {
         // create request
         let url = URL(string: "https://server.firsalex.keenetic.name/\(myUrlRoute)")!
         var request = URLRequest(url: url)
@@ -40,7 +40,7 @@ class SqlRequest: SqlRequestProtocol{
             
             let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
             if let responseJSON = responseJSON as? [String:Any]{
-                completion(responseJSON)
+                completion(responseJSON, response)
             }
         }
         task.resume()
