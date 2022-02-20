@@ -109,8 +109,6 @@ class ChatsUserController: UITableViewController {
                         
                     }
                 }
-                
-                showAlertMessage("Результат сохранения", sql.answerOnRequest)
             }
             else { showAlertMessage("Ошибка при сохранении","Одно из обязательных полей не заполнено!") }
         }
