@@ -79,6 +79,7 @@ class ChatsUserController: UITableViewController {
                     sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { responseJson in
                         if sql.httpStatus?.statusCode == 502 {
                             sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
+                            print(sql.httpStatus?.statusCode)
                         }
                         else if sql.httpStatus?.statusCode == 404 {
                             //POST
@@ -89,11 +90,12 @@ class ChatsUserController: UITableViewController {
                                 }
                                 else { sql.answerOnRequest = "Новая УЗ не сохранена!" }
                             }
+                            
                         }
                         else if sql.httpStatus?.statusCode == 200 {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
-                            sql.answerOnRequest = "Найдена учётка в БД с таким же номером телефона!"
+                            sql.answerOnRequest = "Найдена УЗ в БД с таким же номером телефона!"
                         }
                     }
                 }
@@ -105,8 +107,10 @@ class ChatsUserController: UITableViewController {
                             contact.myUser?.name = name
                             contact.myUser?.telephone = telephone
                         }
+                        else if sql.httpStatus?.statusCode == 502 {
+                            sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
+                        }
                         else { sql.answerOnRequest = "Не удалось обновить запись в таблице пользователей!" }
-                        
                     }
                 }
             }
@@ -119,10 +123,10 @@ class ChatsUserController: UITableViewController {
         alertController.addAction(cancelButton)
         alertController.addAction(createButton)
         // отображаем Alert Controller
-        self.present(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true)
     }
     
-    func showAlertMessage (_ myTitle: String, _ myMessage: String) {
+   func showAlertMessage (_ myTitle: String, _ myMessage: String) {
         let alert = UIAlertController(title: myTitle, message: myMessage, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
