@@ -39,10 +39,8 @@ class SqlRequest: SqlRequestProtocol{
             }
             
             let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            if let responseJSON = responseJSON as? [String:Any]{
-                completion(responseJSON, response)
-            }
-            else {completion(nil,response)}
+            let responseJSONdecode = responseJSON as? [String:Any]
+            completion(responseJSONdecode, response)
         }
         task.resume()
     }
