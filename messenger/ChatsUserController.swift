@@ -76,23 +76,20 @@ class ChatsUserController: UITableViewController {
                 
                 if contact.myUser == nil {
                     //GET
-                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") {[self] responseJson, response in
-                        
-                        guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 502 else {
+                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { responseJson in
+                        guard sql.httpStatus?.statusCode != 502 else {
                             print("Ошибка при сохранении 502 Bad Gateway!")
                             return
                         }
-                        print(httpStatus.statusCode)
-                            
-                        guard httpStatus.statusCode != 200 else {
+                        guard sql.httpStatus?.statusCode != 200 else {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
                             print("Найдена учётка в БД с таким же номером телефона!")
                             return
                         }
                         //POST
-                        sql.sendRequest(myUrlRoute: "users", json: ["name":name, "telephone":telephone], httpMethod: "POST") { responseJson, response in
-                            guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode == 200 else {
+                        sql.sendRequest(myUrlRoute: "users", json: ["name":name, "telephone":telephone], httpMethod: "POST") { responseJson in
+                            guard sql.httpStatus?.statusCode == 200 else {
                                 print("Не удалось создать запись в таблице пользователей!")
                                 return
                             }
@@ -103,8 +100,8 @@ class ChatsUserController: UITableViewController {
                 else {
                     //PATCH
                     sql.sendRequest(myUrlRoute: "users/"+(contact.myUser!.id ?? ""),
-                                    json: ["name":name, "telephone":telephone], httpMethod: "PATCH"){ responseJson, response in
-                        guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode == 200 else {
+                                    json: ["name":name, "telephone":telephone], httpMethod: "PATCH"){ responseJson in
+                        guard sql.httpStatus?.statusCode == 200 else {
                             print("Не удалось обновить запись в таблице пользователей!")
                             return
                         }

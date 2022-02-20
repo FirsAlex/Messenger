@@ -8,16 +8,19 @@
 import Foundation
 
 protocol SqlRequestProtocol {
+    var httpStatus: HTTPURLResponse? { get set}
     func sendRequest(myUrlRoute: String, json: [String: Any], httpMethod: String,
-                     completion: @escaping ([String:Any]?, URLResponse?) -> Void)
+                     completion: @escaping ([String:Any]?) -> Void)
 }
 
 class SqlRequest: SqlRequestProtocol{
+    var httpStatus: HTTPURLResponse?
+    
     init() {
     }
     
     func sendRequest(myUrlRoute: String = "", json: [String: Any] = [:], httpMethod: String,
-                     completion: @escaping ([String:Any]?, URLResponse?) -> Void) {
+                     completion: @escaping ([String:Any]?) -> Void) {
         // create request
         let url = URL(string: "https://server.firsalex.keenetic.name/\(myUrlRoute)")!
         var request = URLRequest(url: url)
@@ -38,9 +41,10 @@ class SqlRequest: SqlRequestProtocol{
                 return
             }
             
+            self.httpStatus = response as? HTTPURLResponse
             let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
             let responseJSONdecode = responseJSON as? [String:Any]
-            completion(responseJSONdecode, response)
+            completion(responseJSONdecode)
         }
         task.resume()
     }
