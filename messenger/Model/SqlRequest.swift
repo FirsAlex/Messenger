@@ -42,6 +42,7 @@ class SqlRequest: SqlRequestProtocol{
             if let responseJSON = responseJSON as? [String:Any]{
                 completion(responseJSON, response)
             }
+            else {completion(nil,response)}
         }
         task.resume()
     }

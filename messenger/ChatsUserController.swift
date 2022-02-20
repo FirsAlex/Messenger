@@ -76,8 +76,15 @@ class ChatsUserController: UITableViewController {
                 
                 if contact.myUser == nil {
                     //GET
-                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") { responseJson, response in
-                        guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 else {
+                    sql.sendRequest(myUrlRoute: "users/by_telephone/" + telephone, httpMethod: "GET") {[self] responseJson, response in
+                        
+                        guard let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 502 else {
+                            print("Ошибка при сохранении 502 Bad Gateway!")
+                            return
+                        }
+                        print(httpStatus.statusCode)
+                            
+                        guard httpStatus.statusCode != 200 else {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
                             print("Найдена учётка в БД с таким же номером телефона!")
