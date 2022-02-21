@@ -9,13 +9,15 @@ import Foundation
 import UIKit
 
 protocol SqlRequestProtocol {
-    var httpStatus: HTTPURLResponse? { get set}
+    var httpStatus: HTTPURLResponse? { get set }
+    var answerOnRequest: String? { get set }
     func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
                      _ completion: @escaping ([String:Any]?) -> Void)
 }
 
 class SqlRequest: SqlRequestProtocol{
     var httpStatus: HTTPURLResponse?
+    var answerOnRequest: String?
     
     init() {
     }

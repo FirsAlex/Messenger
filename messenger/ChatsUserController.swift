@@ -10,7 +10,6 @@ import UIKit
 class ChatsUserController: UITableViewController {
     var contact = ContactStorage.shared
     let sql = SqlRequest()
-    let groupWaitResponseHttp = DispatchGroup()
     
     override func loadView() {
         super.loadView()
@@ -55,7 +54,8 @@ class ChatsUserController: UITableViewController {
     
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
-        var answerOnRequest: String?
+        let groupWaitResponseHttp = DispatchGroup()
+        sql.answerOnRequest = nil
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -71,38 +71,42 @@ class ChatsUserController: UITableViewController {
         
         // кнопка создания контакта
         let createButton = UIAlertAction(title: "Сохранить", style: .default) {[self] _ in
-            groupWaitResponseHttp.enter()
+           
             guard let name = alertController.textFields?[0].text,
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
+                groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     //GET
                     sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { responseJson in
                         if sql.httpStatus?.statusCode == 502 {
-                            answerOnRequest = "Нет связи с сервером\n502 Bad Gateway!"
-                        }
-                        else if sql.httpStatus?.statusCode == 404 {
-                            //POST
-                            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { responseJson in
-                                if sql.httpStatus?.statusCode == 200 {
-                                    contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone, name: name)
-                                    answerOnRequest = "Новая УЗ сохранена!"
-                                }
-                                else { answerOnRequest = "Новая УЗ не сохранена!" }
-                            }
-                            
+                            sql.answerOnRequest = "Нет связи с сервером\n502 Bad Gateway!"
+                            groupWaitResponseHttp.leave()
                         }
                         else if sql.httpStatus?.statusCode == 200 {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
-                            answerOnRequest = "Найдена УЗ в БД с таким же номером телефона!"
+                            sql.answerOnRequest = "Найдена УЗ в БД с таким же номером телефона!"
+                            groupWaitResponseHttp.leave()
                         }
                         else if sql.httpStatus?.statusCode == nil {
-                            answerOnRequest = "Сервер не ответил на запрос!"
+                            sql.answerOnRequest = "Сервер не ответил на запрос!"
+                            groupWaitResponseHttp.leave()
                         }
-                        groupWaitResponseHttp.leave()
+                        //POST
+                        else if sql.httpStatus?.statusCode == 404 {
+                            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { responseJson in
+                                if sql.httpStatus?.statusCode == 200 {
+                                    contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone, name: name)
+                                    sql.answerOnRequest = "Новая УЗ сохранена!"
+                                }
+                                else { sql.answerOnRequest = "Новая УЗ не сохранена!" }
+                                groupWaitResponseHttp.leave()
+                            }
+                        }
                     }
+                    
                 }
                 else {
                     //PATCH
@@ -111,24 +115,23 @@ class ChatsUserController: UITableViewController {
                         if sql.httpStatus?.statusCode == 200 {
                             contact.myUser?.name = name
                             contact.myUser?.telephone = telephone
-                            answerOnRequest = "УЗ обновлена!"
+                            sql.answerOnRequest = "УЗ обновлена!"
                         }
                         else if sql.httpStatus?.statusCode == 502 {
-                            answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
+                            sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
                         }
                         else {
-                            answerOnRequest = "Не удалось обновить запись в таблице пользователей!"
+                            sql.answerOnRequest = "Не удалось обновить запись в таблице пользователей!"
                         }
                         groupWaitResponseHttp.leave()
                     }
                 }
             }
             else {
-                answerOnRequest = "Одно из обязательных полей не заполнено!"
-                groupWaitResponseHttp.leave()
+                sql.answerOnRequest = "Одно из обязательных полей не заполнено!"
             }
             groupWaitResponseHttp.wait()
-            showAlertMessage("Результат сохранения", answerOnRequest ?? "Неизвестный ответ сервера")
+            showAlertMessage("Результат сохранения", sql.answerOnRequest ?? "Неизвестный ответ сервера")
         }
         
         // кнопка отмены
