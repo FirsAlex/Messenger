@@ -10,19 +10,19 @@ import UIKit
 
 protocol SqlRequestProtocol {
     var httpStatus: HTTPURLResponse? { get set}
-    func sendRequest(myUrlRoute: String, json: [String: Any], httpMethod: String,
-                     completion: @escaping ([String:Any]?) -> Void)
+    func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
+                     _ completion: @escaping ([String:Any]?) -> Void)
 }
 
 class SqlRequest: SqlRequestProtocol{
     var httpStatus: HTTPURLResponse?
-    var answerOnRequest: String = ""
+    var answerOnRequest: String?
     
     init() {
     }
     
-    func sendRequest(myUrlRoute: String = "", json: [String: Any] = [:], httpMethod: String,
-                     completion: @escaping ([String:Any]?) -> Void) {
+    func sendRequest(_ myUrlRoute: String = "", _ json: [String: Any] = [:], _ httpMethod: String,
+                     _ completion: @escaping ([String:Any]?) -> Void) {
         // create request
         let url = URL(string: "https://server.firsalex.keenetic.name/\(myUrlRoute)")!
         var request = URLRequest(url: url)
