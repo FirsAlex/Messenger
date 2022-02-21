@@ -78,9 +78,9 @@ class ChatsUserController: UITableViewController {
                 if contact.myUser == nil {
                     //GET
                     sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { responseJson in
+                        print("Answer: \(sql.httpStatus?.statusCode as Any)")
                         if sql.httpStatus?.statusCode == 502 {
                             sql.answerOnRequest = "Нет связи с сервером\n502 Bad Gateway!"
-                            print(sql.httpStatus?.statusCode as Any)
                         }
                         else if sql.httpStatus?.statusCode == 404 {
                             //POST
@@ -97,6 +97,9 @@ class ChatsUserController: UITableViewController {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
                             sql.answerOnRequest = "Найдена УЗ в БД с таким же номером телефона!"
+                        }
+                        else if sql.httpStatus?.statusCode == nil {
+                            sql.answerOnRequest = "Сервер не ответил на запрос!"
                         }
                         groupWaitResponseHttp.leave()
                     }
@@ -132,12 +135,6 @@ class ChatsUserController: UITableViewController {
         alertController.addAction(createButton)
         // отображаем Alert Controller
         self.present(alertController, animated: true)
-    }
-    
-   func showAlertMessage (_ myTitle: String, _ myMessage: String) {
-        let alert = UIAlertController(title: myTitle, message: myMessage, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
     }
     
     // MARK: - Table view data source

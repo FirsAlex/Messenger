@@ -38,8 +38,10 @@ class SqlRequest: SqlRequestProtocol{
         
         let task = URLSession.shared.dataTask(with: request) {
             data, response, error in
+            print("Answer in request: \(String(describing: response))")
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
+                completion(nil)
                 return
             }
             
