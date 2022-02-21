@@ -56,7 +56,7 @@ class ChatsUserController: UITableViewController {
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
         // создание Alert Controller
-        let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: sql.answerOnRequest ?? "(обязательные поля)", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
         alertController.addTextField { textField in
                                     textField.placeholder = "Имя"
@@ -78,7 +78,6 @@ class ChatsUserController: UITableViewController {
                 if contact.myUser == nil {
                     //GET
                     sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { responseJson in
-                        print("Answer: \(sql.httpStatus?.statusCode as Any)")
                         if sql.httpStatus?.statusCode == 502 {
                             sql.answerOnRequest = "Нет связи с сервером\n502 Bad Gateway!"
                         }
@@ -111,11 +110,14 @@ class ChatsUserController: UITableViewController {
                         if sql.httpStatus?.statusCode == 200 {
                             contact.myUser?.name = name
                             contact.myUser?.telephone = telephone
+                            sql.answerOnRequest = "УЗ обновлена!"
                         }
                         else if sql.httpStatus?.statusCode == 502 {
                             sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
                         }
-                        else { sql.answerOnRequest = "Не удалось обновить запись в таблице пользователей!" }
+                        else {
+                            sql.answerOnRequest = "Не удалось обновить запись в таблице пользователей!"
+                        }
                         groupWaitResponseHttp.leave()
                     }
                 }
@@ -125,7 +127,7 @@ class ChatsUserController: UITableViewController {
                 groupWaitResponseHttp.leave()
             }
             groupWaitResponseHttp.wait()
-            showMyContact()
+            showAlertMessage("Результат сохранения", sql.answerOnRequest ?? "Неизвестный ответ сервера")
         }
         
         // кнопка отмены
@@ -135,6 +137,12 @@ class ChatsUserController: UITableViewController {
         alertController.addAction(createButton)
         // отображаем Alert Controller
         self.present(alertController, animated: true)
+    }
+    
+    func showAlertMessage (_ myTitle: String, _ myMessage: String) {
+        let alert = UIAlertController(title: myTitle, message: myMessage, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
     
     // MARK: - Table view data source
