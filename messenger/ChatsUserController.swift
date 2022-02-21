@@ -90,7 +90,6 @@ class ChatsUserController: UITableViewController {
                                     answerOnRequest = "Новая УЗ сохранена!"
                                 }
                                 else { answerOnRequest = "Новая УЗ не сохранена!" }
-                                groupWaitResponseHttp.leave()
                             }
                             
                         }
