@@ -90,6 +90,7 @@ class ChatsUserController: UITableViewController {
                                     answerOnRequest = "Новая УЗ сохранена!"
                                 }
                                 else { answerOnRequest = "Новая УЗ не сохранена!" }
+                                groupWaitResponseHttp.leave()
                             }
                             
                         }
@@ -129,7 +130,6 @@ class ChatsUserController: UITableViewController {
             }
             groupWaitResponseHttp.wait()
             showAlertMessage("Результат сохранения", answerOnRequest ?? "Неизвестный ответ сервера")
-            answerOnRequest = nil
         }
         
         // кнопка отмены
