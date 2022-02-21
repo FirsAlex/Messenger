@@ -16,7 +16,6 @@ protocol SqlRequestProtocol {
 
 class SqlRequest: SqlRequestProtocol{
     var httpStatus: HTTPURLResponse?
-    var answerOnRequest: String?
     
     init() {
     }
