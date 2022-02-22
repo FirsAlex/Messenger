@@ -94,14 +94,15 @@ class ChatsUserController: UITableViewController {
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     //GET
-                    sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { responseJson in
+                    sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") {
+                        let responseJSON = sql.responseJSON as? [String:String]
                         if sql.httpStatus?.statusCode == 502 {
                             sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
                             groupWaitResponseHttp.leave()
                         }
                         else if sql.httpStatus?.statusCode == 200 {
-                            contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
-                                                  name: responseJson?["name"] as? String ?? "")
+                            contact.myUser = User(id: responseJSON?["id"], telephone: telephone,
+                                                  name: responseJSON?["name"] ?? "")
                             sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
                             groupWaitResponseHttp.leave()
                         }
@@ -111,9 +112,9 @@ class ChatsUserController: UITableViewController {
                         }
                         //POST
                         else if sql.httpStatus?.statusCode == 404 {
-                            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { responseJson in
+                            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") {
                                 if sql.httpStatus?.statusCode == 200 {
-                                    contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone, name: name)
+                                    contact.myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
                                     sql.answerOnRequest = "Новый аккаунт сохранён!"
                                 }
                                 else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
@@ -126,7 +127,6 @@ class ChatsUserController: UITableViewController {
                 else {
                     //PATCH
                     sql.sendRequest("users/"+(contact.myUser!.id ?? ""), ["name":name, "telephone":telephone], "PATCH"){
-                        responseJson in
                         if sql.httpStatus?.statusCode == 200 {
                             contact.myUser?.name = name
                             contact.myUser?.telephone = telephone

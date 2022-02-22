@@ -9,21 +9,23 @@ import Foundation
 import UIKit
 
 protocol SqlRequestProtocol {
+    var responseJSON: Any? { get set }
     var httpStatus: HTTPURLResponse? { get set }
     var answerOnRequest: String? { get set }
     func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
-                     _ completion: @escaping ([String:Any]?) -> Void)
+                     _ completion: @escaping () -> Void)
 }
 
 class SqlRequest: SqlRequestProtocol{
     var httpStatus: HTTPURLResponse?
     var answerOnRequest: String?
+    var responseJSON: Any?
     
     init() {
     }
     
     func sendRequest(_ myUrlRoute: String = "", _ json: [String: Any] = [:], _ httpMethod: String,
-                     _ completion: @escaping ([String:Any]?) -> Void) {
+                     _ completion: @escaping () -> Void) {
         // create request
         let url = URL(string: "https://server.firsalex.keenetic.name/\(myUrlRoute)")!
         var request = URLRequest(url: url)
@@ -42,14 +44,13 @@ class SqlRequest: SqlRequestProtocol{
             print("Answer in request: \(String(describing: response))")
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
-                completion(nil)
+                completion()
                 return
             }
             
             self.httpStatus = response as? HTTPURLResponse
-            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            let responseJSONdecode = responseJSON as? [String:Any]
-            completion(responseJSONdecode)
+            self.responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+            completion()
         }
         task.resume()
     }

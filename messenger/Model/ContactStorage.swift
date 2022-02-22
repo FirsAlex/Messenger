@@ -8,17 +8,18 @@
 import Foundation
 
 protocol ContactStorageProtocol {
-    func loadContacts() -> [UserProtocol]?
+    func loadContacts()
     func saveContacts(_ contacts: [UserProtocol])
     
-    func loadMyUser() -> UserProtocol?
+    func loadMyUser()
     func saveMyUser(_ user: UserProtocol)
 }
 
 class ContactStorage: ContactStorageProtocol {
     static let shared = ContactStorage()
+    let sql = SqlRequest()
     
-    var contacts: [UserProtocol]?
+    var contacts: [UserProtocol] = []
     var myUser: UserProtocol? {
         didSet {
             self.saveMyUser(myUser!)
@@ -31,8 +32,8 @@ class ContactStorage: ContactStorageProtocol {
     var storageMyUserKey: String = "myMessenger"
     
     init (){
-        contacts = loadContacts() ?? []
-        myUser = loadMyUser()
+        loadMyUser()
+        loadContacts()
     }
     
     func saveMyUser(_ user: UserProtocol) {
@@ -43,28 +44,39 @@ class ContactStorage: ContactStorageProtocol {
         storageMyUser.set(newElementForStorage, forKey: storageMyUserKey)
     }
     
-    func loadMyUser() -> UserProtocol? {
+    func loadMyUser() {
         let myUserFromStorage = storageMyUser.dictionary(forKey: storageMyUserKey) as? [String : String] ?? [:]
         let id = myUserFromStorage["id"]
         guard let telephone = myUserFromStorage["telephone"],
-              let name = myUserFromStorage["name"] else { return nil}
-        return User(id: id, telephone: telephone, name: name)
+              let name = myUserFromStorage["name"] else { return}
+        myUser = User(id: id, telephone: telephone, name: name)
     }
     
-    func loadContacts() -> [UserProtocol]? {
-        let result = [User(telephone: "123", name: "Name1"), User(telephone: "321", name: "Name2")]
-        /*  var resultTasks: [TaskProtocol] = []
-        let tasksFromStorage = storage.array(forKey: storageKey) as? [[String:String]] ?? []
-        for task in tasksFromStorage {
-            guard let title = task[TaskKey.title.rawValue],
-                  let typeRaw = task[TaskKey.type.rawValue],
-                  let statusRaw = task[TaskKey.status.rawValue] else { continue }
-            let type: TaskPriority = typeRaw == "important" ? .important : .normal
-            let status: TaskStatus = statusRaw == "planned" ? .planned : .completed
-            resultTasks.append(Task(title: title, type: type, status: status))
+    func loadContacts() {
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
+        sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") {[self] in
+            
+            if sql.httpStatus?.statusCode == 502 {
+                sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
+            }
+            else if sql.httpStatus?.statusCode == nil {
+                sql.answerOnRequest = "Сервер не ответил на запрос!"
+            }
+            else if sql.httpStatus?.statusCode == 200 {
+                sql.answerOnRequest = "Сервер ответил на запрос контактов по пользователю!"
+            }
+            groupWaitResponseHttp.leave()
         }
-        return resultTasks*/
-        return result
+
+        groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
+            let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
+            print(responseJSON)
+            responseJSON.map {
+                contacts.append(User(id: $0["id"] as? String, telephone: ($0["telephone"] as? String ?? ""),
+                                     name: ($0["name"] as? String ?? "")))
+            }
+        }
     }
     
     func saveContacts(_ contacts: [UserProtocol]) {

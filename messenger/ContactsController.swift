@@ -44,7 +44,7 @@ class ContactsController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return self.contact.contacts?.count ?? 0
+        return self.contact.contacts.count
     }
 
     
@@ -52,7 +52,7 @@ class ContactsController: UITableViewController {
         // загружаем прототип ячейки по идентификатору
         let cell = tableView.dequeueReusableCell(withIdentifier: "ContactsCell", for: indexPath) as! ContactsCell
 
-        guard let currentContact = contact.contacts?[indexPath.row] else { return cell }
+        let currentContact = contact.contacts[indexPath.row]
         // изменяем текст в ячейке
         cell.nameContact.text = currentContact.name
         cell.telephoneContact.text = currentContact.telephone
@@ -78,7 +78,7 @@ class ContactsController: UITableViewController {
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
-                contact.contacts?.append(User(telephone: telephone, name: name))
+                contact.contacts.append(User(telephone: telephone, name: name))
                 tableView.reloadData()
             }
             else { showNewContact() }

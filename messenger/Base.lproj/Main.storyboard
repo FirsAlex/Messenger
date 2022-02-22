@@ -33,9 +33,9 @@
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
-                    <navigationItem key="navigationItem" title="Чаты" id="HpX-Gg-tXD">
-                        <barButtonItem key="backBarButtonItem" title="Назад" id="rnr-xY-64P"/>
-                        <barButtonItem key="rightBarButtonItem" systemItem="compose" id="OhN-6b-5re"/>
+                    <navigationItem key="navigationItem" title="Чаты" id="Dun-rj-IZm">
+                        <barButtonItem key="leftBarButtonItem" title="Назад" id="Fbd-Re-VcC"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="compose" id="Qqr-rh-Mr5"/>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
