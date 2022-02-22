@@ -71,10 +71,9 @@ class ContactStorage: ContactStorageProtocol {
 
         groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
-            print(responseJSON)
-            responseJSON.map {
-                contacts.append(User(id: $0["id"] as? String, telephone: ($0["telephone"] as? String ?? ""),
-                                     name: ($0["name"] as? String ?? "")))
+            for contact in responseJSON {
+                contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
+                                     name: (contact["name"] as? String ?? "")))
             }
         }
     }
