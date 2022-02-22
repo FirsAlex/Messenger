@@ -64,7 +64,7 @@ class ContactStorage: ContactStorageProtocol {
             }
             else if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone,
-                                      name: name)
+                                      name: (responseJSON?["name"] ?? ""))
                 loadContactsFromDB()
                 sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
                 group.leave()
@@ -109,20 +109,7 @@ class ContactStorage: ContactStorageProtocol {
     func loadContactsFromDB() {
         let group = DispatchGroup()
         group.enter()
-        sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") {[self] in
-            
-            if sql.httpStatus?.statusCode == 502 {
-                sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
-            }
-            else if sql.httpStatus?.statusCode == nil {
-                sql.answerOnRequest = "Сервер не ответил на запрос!"
-            }
-            else if sql.httpStatus?.statusCode == 200 {
-                sql.answerOnRequest = "Сервер ответил на запрос контактов по пользователю!"
-            }
-            else if sql.httpStatus?.statusCode == 404 {
-                sql.answerOnRequest = "Не найдены контакты по данному аккаунту!"
-            }
+        sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") {
             group.leave()
         }
         group.notify(qos: .background, queue: .main) { [self] in
