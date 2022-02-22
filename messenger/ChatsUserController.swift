@@ -89,20 +89,20 @@ class ChatsUserController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 spinner.startAnimating()
-                navigationController?.isNavigationBarHidden = true
-                navigationController?.isToolbarHidden = true
+                navigationController?.setNavigationBarHidden(true, animated: true)
+                navigationController?.setToolbarHidden(true, animated: true)
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     //GET
                     sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { responseJson in
                         if sql.httpStatus?.statusCode == 502 {
-                            sql.answerOnRequest = "Нет связи с сервером\n502 Bad Gateway!"
+                            sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
                             groupWaitResponseHttp.leave()
                         }
                         else if sql.httpStatus?.statusCode == 200 {
                             contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone,
                                                   name: responseJson?["name"] as? String ?? "")
-                            sql.answerOnRequest = "Найдена УЗ в БД с таким же номером телефона!"
+                            sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
                             groupWaitResponseHttp.leave()
                         }
                         else if sql.httpStatus?.statusCode == nil {
@@ -114,9 +114,9 @@ class ChatsUserController: UITableViewController {
                             sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { responseJson in
                                 if sql.httpStatus?.statusCode == 200 {
                                     contact.myUser = User(id: responseJson?["id"] as? String, telephone: telephone, name: name)
-                                    sql.answerOnRequest = "Новая УЗ сохранена!"
+                                    sql.answerOnRequest = "Новый аккаунт сохранён!"
                                 }
-                                else { sql.answerOnRequest = "Новая УЗ не сохранена!" }
+                                else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
                                 groupWaitResponseHttp.leave()
                             }
                         }
@@ -130,7 +130,7 @@ class ChatsUserController: UITableViewController {
                         if sql.httpStatus?.statusCode == 200 {
                             contact.myUser?.name = name
                             contact.myUser?.telephone = telephone
-                            sql.answerOnRequest = "УЗ обновлена!"
+                            sql.answerOnRequest = "Аккаунт обновлён!"
                         }
                         else if sql.httpStatus?.statusCode == 502 {
                             sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
@@ -148,12 +148,9 @@ class ChatsUserController: UITableViewController {
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 spinner.stopAnimating()
-                navigationController?.isNavigationBarHidden = false
-                navigationController?.isToolbarHidden = false
-                showAlertMessage("Результат сохранения",
-                                 (sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n" +
-                                 "\nИмя: \(contact.myUser?.name ?? "")" +
-                                 "\nТелефон: \(contact.myUser?.telephone ?? "")")
+                navigationController?.setNavigationBarHidden(false, animated: true)
+                navigationController?.setToolbarHidden(false, animated: true)
+                showAlertMessage("Результат сохранения", (sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n\nИмя: \(contact.myUser?.name ?? "")" + "\nТелефон: \(contact.myUser?.telephone ?? "")")
                 sql.answerOnRequest = nil
                 sql.httpStatus = nil
             }
