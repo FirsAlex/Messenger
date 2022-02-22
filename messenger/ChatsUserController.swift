@@ -151,7 +151,7 @@ class ChatsUserController: UITableViewController {
                 navigationController?.isNavigationBarHidden = false
                 navigationController?.isToolbarHidden = false
                 showAlertMessage("Результат сохранения",
-                                 (sql.answerOnRequest ?? "Неизвестный ответ сервера") +
+                                 (sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n" +
                                  "\nИмя: \(contact.myUser?.name ?? "")" +
                                  "\nТелефон: \(contact.myUser?.telephone ?? "")")
                 sql.answerOnRequest = nil
