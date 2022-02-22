@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ContactStorageProtocol {
-    func loadContactsFromDB(group: DispatchGroup)
+    func loadContactsFromDB()
     func saveContacts(_ contacts: [UserProtocol])
     
     func loadMyUser()
@@ -64,7 +64,8 @@ class ContactStorage: ContactStorageProtocol {
             }
             else if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone,
-                                      name: responseJSON?["name"] ?? "")
+                                      name: name)
+                loadContactsFromDB()
                 sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
                 group.leave()
             }
@@ -77,6 +78,7 @@ class ContactStorage: ContactStorageProtocol {
                 sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") {
                     if sql.httpStatus?.statusCode == 200 {
                         myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
+                        loadContactsFromDB()
                         sql.answerOnRequest = "Новый аккаунт сохранён!"
                     }
                     else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
@@ -104,7 +106,8 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func loadContactsFromDB(group: DispatchGroup = DispatchGroup()) {
+    func loadContactsFromDB() {
+        let group = DispatchGroup()
         group.enter()
         sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") {[self] in
             

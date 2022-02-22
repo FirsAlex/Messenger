@@ -92,7 +92,6 @@ class ChatsUserController: UITableViewController {
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
-                    contact.loadContactsFromDB(group: groupWaitResponseHttp)
                 }
                 else {
                     contact.patchMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
