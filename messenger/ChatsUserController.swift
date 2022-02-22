@@ -10,8 +10,6 @@ import UIKit
 class ChatsUserController: UITableViewController {
     let spinner = UIActivityIndicatorView()
     var contact = ContactStorage.shared
-    let sql = SqlRequest()
-    
     
     override func loadView() {
         super.loadView()
@@ -93,66 +91,22 @@ class ChatsUserController: UITableViewController {
                 navigationController?.setToolbarHidden(true, animated: true)
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
-                    //GET
-                    sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") {
-                        let responseJSON = sql.responseJSON as? [String:String]
-                        if sql.httpStatus?.statusCode == 502 {
-                            sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
-                            groupWaitResponseHttp.leave()
-                        }
-                        else if sql.httpStatus?.statusCode == 200 {
-                            contact.myUser = User(id: responseJSON?["id"], telephone: telephone,
-                                                  name: responseJSON?["name"] ?? "")
-                            sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
-                            groupWaitResponseHttp.leave()
-                        }
-                        else if sql.httpStatus?.statusCode == nil {
-                            sql.answerOnRequest = "Сервер не ответил на запрос!"
-                            groupWaitResponseHttp.leave()
-                        }
-                        //POST
-                        else if sql.httpStatus?.statusCode == 404 {
-                            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") {
-                                if sql.httpStatus?.statusCode == 200 {
-                                    contact.myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
-                                    sql.answerOnRequest = "Новый аккаунт сохранён!"
-                                }
-                                else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
-                                groupWaitResponseHttp.leave()
-                            }
-                        }
-                    }
-                    
+                    contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
+                    contact.loadContactsFromDB(group: groupWaitResponseHttp)
                 }
                 else {
-                    //PATCH
-                    sql.sendRequest("users/"+(contact.myUser!.id ?? ""), ["name":name, "telephone":telephone], "PATCH"){
-                        if sql.httpStatus?.statusCode == 200 {
-                            contact.myUser?.name = name
-                            contact.myUser?.telephone = telephone
-                            sql.answerOnRequest = "Аккаунт обновлён!"
-                        }
-                        else if sql.httpStatus?.statusCode == 502 {
-                            sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
-                        }
-                        else {
-                            sql.answerOnRequest = "Не удалось обновить запись в таблице пользователей!"
-                        }
-                        groupWaitResponseHttp.leave()
-                    }
+                    contact.patchMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
                 }
             }
             else {
-                sql.answerOnRequest = "Одно из обязательных полей не заполнено!"
+                contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!"
             }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 spinner.stopAnimating()
                 navigationController?.setNavigationBarHidden(false, animated: true)
                 navigationController?.setToolbarHidden(false, animated: true)
-                showAlertMessage("Результат сохранения", (sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n\nИмя: \(contact.myUser?.name ?? "")" + "\nТелефон: \(contact.myUser?.telephone ?? "")")
-                sql.answerOnRequest = nil
-                sql.httpStatus = nil
+                showAlertMessage("Результат сохранения", (contact.sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n\nИмя: \(contact.myUser?.name ?? "")" + "\nТелефон: \(contact.myUser?.telephone ?? "")")
             }
         }
         
