@@ -8,7 +8,7 @@
 import UIKit
 
 class ChatsUserController: UITableViewController {
-    let spinner = UIActivityIndicatorView(style: .large)
+    let spinner = UIActivityIndicatorView()
     var contact = ContactStorage.shared
     let sql = SqlRequest()
     
@@ -59,9 +59,11 @@ class ChatsUserController: UITableViewController {
         let screenSize = UIScreen.main.bounds
         spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 5, height: 5)
         spinner.color = .systemBlue
+        spinner.style = .large
         if let baseView = view.superview {
             baseView.addSubview(spinner)
         }
+        print("Chats - viewDidLayoutSubviews")
     }
     
     // MARK: создание учётной записи или загрузка текущей с сервера
@@ -144,11 +146,14 @@ class ChatsUserController: UITableViewController {
                 sql.answerOnRequest = "Одно из обязательных полей не заполнено!"
             }
             
-            groupWaitResponseHttp.notify(queue: .main) {
+            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 spinner.stopAnimating()
                 navigationController?.isNavigationBarHidden = false
                 navigationController?.isToolbarHidden = false
-                showAlertMessage("Результат сохранения", sql.answerOnRequest ?? "Неизвестный ответ сервера")
+                showAlertMessage("Результат сохранения",
+                                 (sql.answerOnRequest ?? "Неизвестный ответ сервера") +
+                                 "\nИмя: \(contact.myUser?.name ?? "")" +
+                                 "\nТелефон: \(contact.myUser?.telephone ?? "")")
                 sql.answerOnRequest = nil
                 sql.httpStatus = nil
             }
