@@ -8,8 +8,10 @@
 import UIKit
 
 class ChatsUserController: UITableViewController {
+    let spinner = UIActivityIndicatorView(style: .large)
     var contact = ContactStorage.shared
     let sql = SqlRequest()
+    
     
     override func loadView() {
         super.loadView()
@@ -52,10 +54,21 @@ class ChatsUserController: UITableViewController {
         }
     }
     
+    //MARK: subView spinner
+    override func viewDidLayoutSubviews() {
+        let screenSize = UIScreen.main.bounds
+        spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 10, height: 10)
+        spinner.color = .gray
+        //spinner.hidesWhenStopped = true
+        
+        if let baseView = view.superview {
+            baseView.addSubview(spinner)
+        }
+    }
+    
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
         let groupWaitResponseHttp = DispatchGroup()
-        sql.answerOnRequest = nil
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -71,11 +84,11 @@ class ChatsUserController: UITableViewController {
         
         // кнопка создания контакта
         let createButton = UIAlertAction(title: "Сохранить", style: .default) {[self] _ in
-           
             guard let name = alertController.textFields?[0].text,
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
+                spinner.startAnimating()
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     //GET
@@ -130,8 +143,13 @@ class ChatsUserController: UITableViewController {
             else {
                 sql.answerOnRequest = "Одно из обязательных полей не заполнено!"
             }
-            groupWaitResponseHttp.wait()
-            showAlertMessage("Результат сохранения", sql.answerOnRequest ?? "Неизвестный ответ сервера")
+            
+            groupWaitResponseHttp.notify(queue: .main) {
+                spinner.stopAnimating()
+                showAlertMessage("Результат сохранения", sql.answerOnRequest ?? "Неизвестный ответ сервера")
+                sql.answerOnRequest = nil
+                sql.httpStatus = nil
+            }
         }
         
         // кнопка отмены
@@ -157,7 +175,7 @@ class ChatsUserController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 1
+        return 10
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
