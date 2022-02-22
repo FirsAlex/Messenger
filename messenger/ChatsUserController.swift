@@ -57,10 +57,8 @@ class ChatsUserController: UITableViewController {
     //MARK: subView spinner
     override func viewDidLayoutSubviews() {
         let screenSize = UIScreen.main.bounds
-        spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 10, height: 10)
-        spinner.color = .gray
-        //spinner.hidesWhenStopped = true
-        
+        spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 5, height: 5)
+        spinner.color = .systemBlue
         if let baseView = view.superview {
             baseView.addSubview(spinner)
         }
@@ -89,6 +87,8 @@ class ChatsUserController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 spinner.startAnimating()
+                navigationController?.isNavigationBarHidden = true
+                navigationController?.isToolbarHidden = true
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     //GET
@@ -146,6 +146,8 @@ class ChatsUserController: UITableViewController {
             
             groupWaitResponseHttp.notify(queue: .main) {
                 spinner.stopAnimating()
+                navigationController?.isNavigationBarHidden = false
+                navigationController?.isToolbarHidden = false
                 showAlertMessage("Результат сохранения", sql.answerOnRequest ?? "Неизвестный ответ сервера")
                 sql.answerOnRequest = nil
                 sql.httpStatus = nil

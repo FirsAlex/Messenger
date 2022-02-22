@@ -21,13 +21,13 @@
                         </connections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem title="Учётная запись" image="person.fill" catalog="system" id="Qvq-4j-16y">
+                        <barButtonItem title="Учётная запись" image="person.fill" catalog="system" id="Qvq-4j-16y" userLabel="Account">
                             <connections>
                                 <action selector="showMyContact" destination="4Np-A4-DTZ" id="qCA-Ck-BOa"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="VX0-ce-nNe"/>
-                        <barButtonItem title="Контакты" image="book" catalog="system" id="cPn-YK-XDJ">
+                        <barButtonItem title="Контакты" image="book" catalog="system" id="cPn-YK-XDJ" userLabel="Contacts">
                             <connections>
                                 <segue destination="o19-yf-gkj" kind="show" id="bgf-rn-qhf"/>
                             </connections>
