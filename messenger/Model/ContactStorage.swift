@@ -12,9 +12,11 @@ protocol ContactStorageProtocol {
     func saveContacts(_ contacts: [UserProtocol])
     
     func loadMyUser()
-    func getMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
-    func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
     func saveMyUser(_ user: UserProtocol)
+    
+    func getMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
+    func postMyUserToDB(group: DispatchGroup, telephone: String, name: String)
+    func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
 }
 
 class ContactStorage: ContactStorageProtocol {
@@ -62,30 +64,33 @@ class ContactStorage: ContactStorageProtocol {
                 self.sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
                 group.leave()
             }
-            else if sql.httpStatus?.statusCode == 200 {
-                myUser = User(id: responseJSON?["id"], telephone: telephone,
-                                      name: (responseJSON?["name"] ?? ""))
-                loadContactsFromDB()
-                sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
-                group.leave()
-            }
             else if sql.httpStatus?.statusCode == nil {
                 sql.answerOnRequest = "Сервер не ответил на запрос!"
                 group.leave()
             }
-            //POST
+            else if sql.httpStatus?.statusCode == 200 {
+                myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
+                loadContactsFromDB()
+                sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
+                group.leave()
+            }
             else if sql.httpStatus?.statusCode == 404 {
-                sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") {
-                    if sql.httpStatus?.statusCode == 200 {
-                        myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
-                        loadContactsFromDB()
-                        sql.answerOnRequest = "Новый аккаунт сохранён!"
-                    }
-                    else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
-                    group.leave()
-                }
+                postMyUserToDB(group: group, telephone: telephone, name: name)
             }
         }
+    }
+
+    func postMyUserToDB(group: DispatchGroup, telephone: String, name: String){
+        //POST
+            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { [self] in
+                let responseJSON = sql.responseJSON as? [String:String]
+                if sql.httpStatus?.statusCode == 200 {
+                    myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
+                    sql.answerOnRequest = "Новый аккаунт сохранён!"
+                }
+                else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
+                group.leave()
+            }
     }
     
     func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String) {
