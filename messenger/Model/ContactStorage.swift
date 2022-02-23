@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ContactStorageProtocol {
-    func loadContactsFromDB()
+    func loadContactsFromDB(group: DispatchGroup?)
     func saveContacts(_ contacts: [UserProtocol])
     
     func loadMyUser()
@@ -70,9 +70,8 @@ class ContactStorage: ContactStorageProtocol {
             }
             else if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
-                loadContactsFromDB()
                 sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
-                group.leave()
+                loadContactsFromDB(group: group)
             }
             else if sql.httpStatus?.statusCode == 404 {
                 postMyUserToDB(group: group, telephone: telephone, name: name)
@@ -111,18 +110,20 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func loadContactsFromDB() {
-        let group = DispatchGroup()
-        group.enter()
+    func loadContactsFromDB(group: DispatchGroup? = nil) {
+        let groupWaitResponse = DispatchGroup()
+        groupWaitResponse.enter()
         sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") {
-            group.leave()
+            groupWaitResponse.leave()
         }
-        group.notify(qos: .background, queue: .main) { [self] in
+        groupWaitResponse.notify(qos: .background, queue: .main) { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             for contact in responseJSON {
                 contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
                                      name: (contact["name"] as? String ?? "")))
             }
+            
+            group?.leave()
         }
     }
     

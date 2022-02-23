@@ -113,8 +113,8 @@
 			isa = PBXGroup;
 			children = (
 				61BC178527B2B0AF0028BD61 /* User.swift */,
-				61BC178727B2B5910028BD61 /* ContactStorage.swift */,
 				61A8427C27BF709000D9495F /* SqlRequest.swift */,
+				61BC178727B2B5910028BD61 /* ContactStorage.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
