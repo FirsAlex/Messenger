@@ -13,8 +13,18 @@ class ChatsUserController: UITableViewController {
     
     override func loadView() {
         super.loadView()
+        contact.loadMyUser()
         if self.contact.myUser == nil {
             showMyContact()
+        }
+        else {
+            startSpinner("Загрузка контактов", true)
+            let groupWaitResponseHttp = DispatchGroup()
+            groupWaitResponseHttp.enter()
+            contact.loadContactsFromDB(group: groupWaitResponseHttp)
+            groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
+                startSpinner("", false)
+            }
         }
         print("Chats - loadView")
     }
@@ -86,9 +96,7 @@ class ChatsUserController: UITableViewController {
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
-                spinner.startAnimating()
-                navigationController?.setNavigationBarHidden(true, animated: true)
-                navigationController?.setToolbarHidden(true, animated: true)
+                startSpinner("Сохранение", true)
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
@@ -102,9 +110,8 @@ class ChatsUserController: UITableViewController {
             }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                spinner.stopAnimating()
-                navigationController?.setNavigationBarHidden(false, animated: true)
-                navigationController?.setToolbarHidden(false, animated: true)
+                print("Q4")
+                startSpinner("", false)
                 showAlertMessage("Результат сохранения", (contact.sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n\nИмя: \(contact.myUser?.name ?? "")" + "\nТелефон: \(contact.myUser?.telephone ?? "")")
             }
         }
@@ -122,6 +129,20 @@ class ChatsUserController: UITableViewController {
         let alert = UIAlertController(title: myTitle, message: myMessage, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
+    }
+    
+    func startSpinner(_ myTitle: String, _ onOf: Bool){
+        if onOf {
+            spinner.largeContentTitle = myTitle
+            spinner.startAnimating()
+            navigationController?.setNavigationBarHidden(true, animated: true)
+            navigationController?.setToolbarHidden(true, animated: true)
+        }
+        else {
+            spinner.stopAnimating()
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            navigationController?.setToolbarHidden(false, animated: true)
+        }
     }
     
     // MARK: - Table view data source

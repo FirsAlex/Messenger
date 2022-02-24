@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ContactStorageProtocol {
-    func loadContactsFromDB(group: DispatchGroup?)
+    func loadContactsFromDB(group: DispatchGroup)
     func saveContacts(_ contacts: [UserProtocol])
     
     func loadMyUser()
@@ -36,8 +36,6 @@ class ContactStorage: ContactStorageProtocol {
     var storageMyUserKey: String = "myMessenger"
     
     init (){
-        loadMyUser()
-        loadContactsFromDB()
     }
     
     func saveMyUser(_ user: UserProtocol) {
@@ -71,7 +69,9 @@ class ContactStorage: ContactStorageProtocol {
             else if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
                 sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
+                print("Q1")
                 loadContactsFromDB(group: group)
+                print("Q3")
             }
             else if sql.httpStatus?.statusCode == 404 {
                 postMyUserToDB(group: group, telephone: telephone, name: name)
@@ -110,20 +110,15 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func loadContactsFromDB(group: DispatchGroup? = nil) {
-        let groupWaitResponse = DispatchGroup()
-        groupWaitResponse.enter()
-        sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") {
-            groupWaitResponse.leave()
-        }
-        groupWaitResponse.notify(qos: .background, queue: .main) { [self] in
+    func loadContactsFromDB(group: DispatchGroup) {
+        sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             for contact in responseJSON {
                 contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
                                      name: (contact["name"] as? String ?? "")))
             }
-            
-            group?.leave()
+            print("Q2")
+            group.leave()
         }
     }
     
