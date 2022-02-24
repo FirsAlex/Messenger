@@ -9,6 +9,7 @@ import UIKit
 
 class ChatsUserController: UITableViewController {
     let spinner = UIActivityIndicatorView()
+    let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared
     
     override func loadView() {
@@ -19,7 +20,6 @@ class ChatsUserController: UITableViewController {
         }
         else {
             startSpinner("Загрузка контактов", true)
-            let groupWaitResponseHttp = DispatchGroup()
             groupWaitResponseHttp.enter()
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
@@ -76,7 +76,6 @@ class ChatsUserController: UITableViewController {
     
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
-        let groupWaitResponseHttp = DispatchGroup()
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
