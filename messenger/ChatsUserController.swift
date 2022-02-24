@@ -19,11 +19,11 @@ class ChatsUserController: UITableViewController {
             showMyContact()
         }
         else {
-            startSpinner("Загрузка контактов", true)
+            startSpinner(true)
             groupWaitResponseHttp.enter()
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
-                startSpinner("", false)
+                startSpinner(false)
             }
         }
         print("Chats - loadView")
@@ -65,7 +65,7 @@ class ChatsUserController: UITableViewController {
     //MARK: subView spinner
     override func viewDidLayoutSubviews() {
         let screenSize = UIScreen.main.bounds
-        spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 5, height: 5)
+        spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 20, height: 10)
         spinner.color = .systemBlue
         spinner.style = .large
         if let baseView = view.superview {
@@ -95,7 +95,7 @@ class ChatsUserController: UITableViewController {
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
-                startSpinner("Сохранение", true)
+                startSpinner(true)
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
@@ -109,8 +109,7 @@ class ChatsUserController: UITableViewController {
             }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                print("Q4")
-                startSpinner("", false)
+                startSpinner(false)
                 showAlertMessage("Результат сохранения", (contact.sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n\nИмя: \(contact.myUser?.name ?? "")" + "\nТелефон: \(contact.myUser?.telephone ?? "")")
             }
         }
@@ -130,9 +129,8 @@ class ChatsUserController: UITableViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
-    func startSpinner(_ myTitle: String, _ onOf: Bool){
+    func startSpinner(_ onOf: Bool){
         if onOf {
-            spinner.largeContentTitle = myTitle
             spinner.startAnimating()
             navigationController?.setNavigationBarHidden(true, animated: true)
             navigationController?.setToolbarHidden(true, animated: true)
@@ -165,8 +163,5 @@ class ChatsUserController: UITableViewController {
         chatsCell.lastMessage.text = "Вы: Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
         return chatsCell
     }
-
-
-    
 
 }

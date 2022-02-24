@@ -69,9 +69,7 @@ class ContactStorage: ContactStorageProtocol {
             else if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
                 sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
-                print("Q1")
                 loadContactsFromDB(group: group)
-                print("Q3")
             }
             else if sql.httpStatus?.statusCode == 404 {
                 postMyUserToDB(group: group, telephone: telephone, name: name)
@@ -81,13 +79,13 @@ class ContactStorage: ContactStorageProtocol {
 
     func postMyUserToDB(group: DispatchGroup, telephone: String, name: String){
         //POST
-            sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { [self] in
-                let responseJSON = sql.responseJSON as? [String:String]
-                if sql.httpStatus?.statusCode == 200 {
-                    myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
-                    sql.answerOnRequest = "Новый аккаунт сохранён!"
-                }
-                else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
+        sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { [self] in
+            let responseJSON = sql.responseJSON as? [String:String]
+            if sql.httpStatus?.statusCode == 200 {
+                myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
+                sql.answerOnRequest = "Новый аккаунт сохранён!"
+            }
+            else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
                 group.leave()
             }
     }
@@ -117,7 +115,6 @@ class ContactStorage: ContactStorageProtocol {
                 contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
                                      name: (contact["name"] as? String ?? "")))
             }
-            print("Q2")
             group.leave()
         }
     }
