@@ -105,10 +105,12 @@ class ContactStorage: ContactStorageProtocol {
                     contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
                                          name: (contact["name"] as? String ?? "")))
                 }
-                print("Контакты загружены!")
-                print(sql.answerOnRequest)
-                sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "\nКонтакты аккаунта загружены!"
-                print(sql.answerOnRequest)
+                if responseJSON.count != 0 {
+                    sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "\nКонтакты аккаунта загружены!"
+                }
+                else {
+                    sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "\nУ аккаунта не найдено контактов!"
+                }
                 group.leave()
             }
         }

@@ -69,5 +69,9 @@ class SqlRequest: SqlRequestProtocol{
             answerOnRequest = "Неправильный параметр в строке запроса!"
             group.leave()
         }
+        else if statusCode == 500 {
+            answerOnRequest = "Нарушение уникальности поля, такой телефон уже существует у аккаунта!"
+            group.leave()
+        }
     }
 }
