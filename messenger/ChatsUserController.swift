@@ -24,7 +24,7 @@ class ChatsUserController: UITableViewController {
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
                 startSpinner(false)
-                showAlertMessage("Результат подгрузки контактов")
+                showAlertMessage("Загрузка контактов")
             }
         }
         print("Chats - loadView")

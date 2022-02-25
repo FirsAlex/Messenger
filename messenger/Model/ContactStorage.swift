@@ -61,7 +61,7 @@ class ContactStorage: ContactStorageProtocol {
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
-                sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!" + "\nИмя: \(myUser?.name ?? "")" + "\nТелефон: \(myUser?.telephone ?? "")"
+                sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!" + "\nИмя: \(myUser?.name ?? "")" + "\nТелефон: \(myUser?.telephone ?? "")\n"
                 loadContactsFromDB(group: group)
             }
             else if sql.httpStatus?.statusCode == 404 {
@@ -106,10 +106,10 @@ class ContactStorage: ContactStorageProtocol {
                                          name: (contact["name"] as? String ?? "")))
                 }
                 if responseJSON.count != 0 {
-                    sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "\nКонтакты аккаунта загружены!"
+                    sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "Контакты аккаунта загружены!"
                 }
                 else {
-                    sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "\nУ аккаунта не найдено контактов!"
+                    sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "У аккаунта не найдено контактов!"
                 }
                 group.leave()
             }
