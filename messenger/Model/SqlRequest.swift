@@ -12,6 +12,7 @@ protocol SqlRequestProtocol {
     var responseJSON: Any? { get set }
     var httpStatus: HTTPURLResponse? { get set }
     var answerOnRequest: String? { get set }
+    func answerOnRequestError(group: DispatchGroup, statusCode: Int?)
     func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
                      _ completion: @escaping () -> Void)
 }
@@ -41,7 +42,7 @@ class SqlRequest: SqlRequestProtocol{
         
         let task = URLSession.shared.dataTask(with: request) {
             data, response, error in
-            print("Answer in request: \(String(describing: response))")
+            //print("Answer in request: \(String(describing: response))")
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
                 completion()
@@ -53,5 +54,20 @@ class SqlRequest: SqlRequestProtocol{
             completion()
         }
         task.resume()
+    }
+    
+    func answerOnRequestError(group: DispatchGroup, statusCode: Int?) {
+        if statusCode == 502 {
+            answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
+            group.leave()
+        }
+        else if statusCode == nil {
+            answerOnRequest = "Сервер не ответил на запрос!"
+            group.leave()
+        }
+        else if statusCode == 400 {
+            answerOnRequest = "Неправильный параметр в строке запроса!"
+            group.leave()
+        }
     }
 }

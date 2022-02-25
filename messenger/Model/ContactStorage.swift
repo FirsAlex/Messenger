@@ -58,17 +58,10 @@ class ContactStorage: ContactStorageProtocol {
         //GET
         sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [String:String]
-            if sql.httpStatus?.statusCode == 502 {
-                self.sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
-                group.leave()
-            }
-            else if sql.httpStatus?.statusCode == nil {
-                sql.answerOnRequest = "Сервер не ответил на запрос!"
-                group.leave()
-            }
-            else if sql.httpStatus?.statusCode == 200 {
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
-                sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!"
+                sql.answerOnRequest = "Найден аккаунт в БД с таким же номером телефона!" + "\nИмя: \(myUser?.name ?? "")" + "\nТелефон: \(myUser?.telephone ?? "")"
                 loadContactsFromDB(group: group)
             }
             else if sql.httpStatus?.statusCode == 404 {
@@ -81,41 +74,43 @@ class ContactStorage: ContactStorageProtocol {
         //POST
         sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { [self] in
             let responseJSON = sql.responseJSON as? [String:String]
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             if sql.httpStatus?.statusCode == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
                 sql.answerOnRequest = "Новый аккаунт сохранён!"
-            }
-            else { sql.answerOnRequest = "Новый аккаунт не сохранён!" }
                 group.leave()
             }
+        }
     }
     
     func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String) {
         //PATCH
         sql.sendRequest("users/"+(myUser!.id ?? ""), ["name":name, "telephone":telephone], "PATCH"){ [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             if sql.httpStatus?.statusCode == 200 {
                 myUser?.name = name
                 myUser?.telephone = telephone
                 sql.answerOnRequest = "Аккаунт обновлён!"
+                group.leave()
             }
-            else if sql.httpStatus?.statusCode == 502 {
-                sql.answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
-            }
-            else {
-                sql.answerOnRequest = "Не удалось обновить запись в таблице пользователей!"
-            }
-            group.leave()
         }
     }
     
     func loadContactsFromDB(group: DispatchGroup) {
         sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
-            for contact in responseJSON {
-                contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
-                                     name: (contact["name"] as? String ?? "")))
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            if sql.httpStatus?.statusCode == 200 {
+                for contact in responseJSON {
+                    contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
+                                         name: (contact["name"] as? String ?? "")))
+                }
+                print("Контакты загружены!")
+                print(sql.answerOnRequest)
+                sql.answerOnRequest = "\(sql.answerOnRequest ?? "")" + "\nКонтакты аккаунта загружены!"
+                print(sql.answerOnRequest)
+                group.leave()
             }
-            group.leave()
         }
     }
     

@@ -24,6 +24,7 @@ class ChatsUserController: UITableViewController {
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
                 startSpinner(false)
+                showAlertMessage("Результат подгрузки контактов")
             }
         }
         print("Chats - loadView")
@@ -110,7 +111,7 @@ class ChatsUserController: UITableViewController {
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 startSpinner(false)
-                showAlertMessage("Результат сохранения", (contact.sql.answerOnRequest ?? "Неизвестный ответ сервера") + "\n\nИмя: \(contact.myUser?.name ?? "")" + "\nТелефон: \(contact.myUser?.telephone ?? "")")
+                showAlertMessage("Результат сохранения")
             }
         }
         
@@ -123,8 +124,8 @@ class ChatsUserController: UITableViewController {
         self.present(alertController, animated: true)
     }
     
-    func showAlertMessage (_ myTitle: String, _ myMessage: String) {
-        let alert = UIAlertController(title: myTitle, message: myMessage, preferredStyle: .alert)
+    func showAlertMessage (_ myTitle: String) {
+        let alert = UIAlertController(title: myTitle, message: (contact.sql.answerOnRequest ?? "Неизвестный ответ сервера"), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
