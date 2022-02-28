@@ -98,18 +98,22 @@ class ContactsController: UITableViewController {
         self.present(alertController, animated: true, completion: nil)
     }
     
-    //MARK: Обработка нажатия на иконку редактирования - в данном случае только delete (insert не обозначили)
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    //MARK: Обработка swipe влево - удаление
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    // действие удаления
+    let actionDelete = UIContextualAction(style: .destructive, title: "Удалить") { [self] _,_,_ in
         spinner = contact.startSpinner("Удаление", self)
         groupWaitResponseHttp.enter()
         contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
-        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
             // удаляем строку, соответствующую задаче
-            tableView.deleteRows(at: [indexPath], with: .automatic)
             tableView.reloadData()
             spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", self)})
         }
-          
+    }
+    // формируем экземпляр, описывающий доступные действия
+    let actions = UISwipeActionsConfiguration(actions: [actionDelete])
+    return actions
     }
 
 }
