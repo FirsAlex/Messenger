@@ -9,6 +9,7 @@ import UIKit
 
 class ChatsUserController: UITableViewController {
     let groupWaitResponseHttp = DispatchGroup()
+    var spinner: UIAlertController?
     var contact = ContactStorage.shared
     
     override func loadView() {
@@ -18,7 +19,6 @@ class ChatsUserController: UITableViewController {
             showMyContact()
         }
         else {
-            var spinner: UIAlertController?
             spinner = startSpinner(myTitle: "Загрузка контактов")
             groupWaitResponseHttp.enter()
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
@@ -64,7 +64,6 @@ class ChatsUserController: UITableViewController {
     
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
-        var spinner: UIAlertController?
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -119,12 +118,12 @@ class ChatsUserController: UITableViewController {
     
     func startSpinner(myTitle: String = "") -> UIAlertController? {
         //create an alert controller
-        let myAlert = UIAlertController(title: myTitle, message: "\n\n", preferredStyle: .alert)
+        let myAlert = UIAlertController(title: myTitle, message: "\n\n\n", preferredStyle: .alert)
         //create an activity indicator
         let spinner = UIActivityIndicatorView(frame: myAlert.view.bounds)
         spinner.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         spinner.color = .systemBlue
-        //spinner.style = .large
+        spinner.style = .large
         // required otherwise if there buttons in the UIAlertController you will not be able to press them
         spinner.isUserInteractionEnabled = false
         spinner.startAnimating()
