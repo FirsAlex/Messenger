@@ -38,18 +38,6 @@ class ContactsController: UITableViewController {
         print("Contacts - viewWillAppear")
     }
     
-    //MARK: кнопка edit в режиме редактирования
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        
-        if !editing {
-            self.editButtonItem.title = "Изменить"
-        }
-        else {
-            self.editButtonItem.title = "Применить"
-        }
-    }
-    
     // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
