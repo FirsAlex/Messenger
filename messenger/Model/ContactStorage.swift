@@ -122,10 +122,10 @@ class ContactStorage: ContactStorageProtocol {
         if (self.contacts.filter{$0.telephone == telephone}.count == 0) {
             //POST
             sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), ["name":name, "telephone":telephone], "POST") { [self] in
-                let responseJSON = sql.responseJSON as? [String:String]
+                let responseJSON = sql.responseJSON as? [String:Any]
                 sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
                 if sql.httpStatus?.statusCode == 200 {
-                    self.contacts.append(User(id: responseJSON?["id"], telephone: telephone, name: name))
+                    self.contacts.append(User(id: responseJSON?["id"] as? String, telephone: telephone, name: name))
                     sql.answerOnRequest = "Новый контакт сохранён!"
                     group.leave()
                 }

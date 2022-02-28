@@ -85,8 +85,8 @@ class ContactsController: UITableViewController {
             else { contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!" }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                tableView.reloadData()
                 spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
+                tableView.reloadData()
             }
         }
         // кнопка отмены
@@ -100,20 +100,19 @@ class ContactsController: UITableViewController {
     
     //MARK: Обработка swipe влево - удаление
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-    // действие удаления
-    let actionDelete = UIContextualAction(style: .destructive, title: "Удалить") { [self] _,_,_ in
-        spinner = contact.startSpinner("Удаление", self)
-        groupWaitResponseHttp.enter()
-        contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
-        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-            // удаляем строку, соответствующую задаче
-            tableView.reloadData()
-            spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", self)})
+        // действие удаления
+        let actionDelete = UIContextualAction(style: .normal, title: "\u{1F5D1}") { [self] _,_,_ in
+            spinner = contact.startSpinner("Удаление", self)
+            groupWaitResponseHttp.enter()
+            contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
+            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+                // удаляем строку, соответствующую задаче
+                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", self)})
+                tableView.reloadData()
+            }
         }
+        // формируем экземпляр, описывающий доступные действия
+        let actions = UISwipeActionsConfiguration(actions: [actionDelete])
+        return actions
     }
-    // формируем экземпляр, описывающий доступные действия
-    let actions = UISwipeActionsConfiguration(actions: [actionDelete])
-    return actions
-    }
-
 }
