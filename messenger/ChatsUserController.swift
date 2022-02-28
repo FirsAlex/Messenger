@@ -8,7 +8,6 @@
 import UIKit
 
 class ChatsUserController: UITableViewController {
-    let spinner = UIActivityIndicatorView()
     let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared
     
@@ -19,12 +18,12 @@ class ChatsUserController: UITableViewController {
             showMyContact()
         }
         else {
-            startSpinner(true)
+            var spinner: UIAlertController?
+            spinner = startSpinner(myTitle: "Загрузка контактов")
             groupWaitResponseHttp.enter()
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
-            groupWaitResponseHttp.notify(qos: .background, queue: .main) { [self] in
-                startSpinner(false)
-                showAlertMessage("Загрузка контактов")
+            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+                spinner?.dismiss(animated: true, completion: { showAlertMessage("Загрузка контактов")})
             }
         }
         print("Chats - loadView")
@@ -63,20 +62,9 @@ class ChatsUserController: UITableViewController {
         }
     }
     
-    //MARK: subView spinner
-    override func viewDidLayoutSubviews() {
-        let screenSize = UIScreen.main.bounds
-        spinner.frame = CGRect(x: screenSize.width / 2, y: screenSize.height / 2, width: 20, height: 10)
-        spinner.color = .systemBlue
-        spinner.style = .large
-        if let baseView = view.superview {
-            baseView.addSubview(spinner)
-        }
-        print("Chats - viewDidLayoutSubviews")
-    }
-    
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
+        var spinner: UIAlertController?
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -96,7 +84,7 @@ class ChatsUserController: UITableViewController {
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
-                startSpinner(true)
+                spinner = startSpinner(myTitle: "Сохранение")
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
@@ -110,8 +98,7 @@ class ChatsUserController: UITableViewController {
             }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                startSpinner(false)
-                showAlertMessage("Результат сохранения")
+                spinner?.dismiss(animated: true, completion: {showAlertMessage("Результат сохранения")})
             }
         }
         
@@ -130,17 +117,21 @@ class ChatsUserController: UITableViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
-    func startSpinner(_ onOf: Bool){
-        if onOf {
-            spinner.startAnimating()
-            navigationController?.setNavigationBarHidden(true, animated: true)
-            navigationController?.setToolbarHidden(true, animated: true)
-        }
-        else {
-            spinner.stopAnimating()
-            navigationController?.setNavigationBarHidden(false, animated: true)
-            navigationController?.setToolbarHidden(false, animated: true)
-        }
+    func startSpinner(myTitle: String = "") -> UIAlertController? {
+        //create an alert controller
+        let myAlert = UIAlertController(title: myTitle, message: "\n\n", preferredStyle: .alert)
+        //create an activity indicator
+        let spinner = UIActivityIndicatorView(frame: myAlert.view.bounds)
+        spinner.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        spinner.color = .systemBlue
+        //spinner.style = .large
+        // required otherwise if there buttons in the UIAlertController you will not be able to press them
+        spinner.isUserInteractionEnabled = false
+        spinner.startAnimating()
+        //add the activity indicator as a subview of the alert controller's view
+        myAlert.view.addSubview(spinner)
+        self.present(myAlert, animated: true, completion: nil)
+        return myAlert
     }
     
     // MARK: - Table view data source

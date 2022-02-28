@@ -9,7 +9,7 @@ import Foundation
 
 protocol ContactStorageProtocol {
     func loadContactsFromDB(group: DispatchGroup)
-    func saveContacts(_ contacts: [UserProtocol])
+    func saveContactsToDB(_ contacts: [UserProtocol])
     
     func loadMyUser()
     func saveMyUser(_ user: UserProtocol)
@@ -116,6 +116,6 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func saveContacts(_ contacts: [UserProtocol]) {
+    func saveContactsToDB(_ contacts: [UserProtocol]) {
     }
 }
