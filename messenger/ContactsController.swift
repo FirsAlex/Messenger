@@ -8,7 +8,10 @@
 import UIKit
 
 class ContactsController: UITableViewController {
+    let groupWaitResponseHttp = DispatchGroup()
+    var spinner: UIAlertController?
     var contact = ContactStorage.shared
+    
     deinit{
         print("ContactsController - deinit")
     }
@@ -51,7 +54,6 @@ class ContactsController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // загружаем прототип ячейки по идентификатору
         let cell = tableView.dequeueReusableCell(withIdentifier: "ContactsCell", for: indexPath) as! ContactsCell
-
         let currentContact = contact.contacts[indexPath.row]
         // изменяем текст в ячейке
         cell.nameContact.text = currentContact.name
@@ -59,7 +61,7 @@ class ContactsController: UITableViewController {
         return cell
     }
     
-    // MARK: создание учётной записи
+    // MARK: создание контакта для аккаунта текущего
     @IBAction func showNewContact() {
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите имя и телефон нового контакта", message: "(обязательные поля)", preferredStyle: .alert)
@@ -78,10 +80,16 @@ class ContactsController: UITableViewController {
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
-                contact.contacts.append(User(telephone: telephone, name: name))
-                tableView.reloadData()
+                spinner = contact.startSpinner("Сохранение", self)
+                groupWaitResponseHttp.enter()
+                contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
             }
-            else { showNewContact() }
+            else { contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!" }
+            
+            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+                tableView.reloadData()
+                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
+            }
         }
         
         // кнопка отмены

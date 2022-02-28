@@ -19,11 +19,11 @@ class ChatsUserController: UITableViewController {
             showMyContact()
         }
         else {
-            spinner = startSpinner(myTitle: "Загрузка контактов")
+            spinner = contact.startSpinner("Загрузка контактов", self)
             groupWaitResponseHttp.enter()
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-                spinner?.dismiss(animated: true, completion: { showAlertMessage("Загрузка контактов")})
+                spinner?.dismiss(animated: true, completion: { contact.showAlertMessage("Загрузка контактов", self)})
             }
         }
         print("Chats - loadView")
@@ -83,7 +83,7 @@ class ChatsUserController: UITableViewController {
                   let telephone = alertController.textFields?[1].text else { return }
             // создаем новый контакт
             if name != "" && telephone != "" {
-                spinner = startSpinner(myTitle: "Сохранение")
+                spinner = contact.startSpinner("Сохранение", self)
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
@@ -97,10 +97,9 @@ class ChatsUserController: UITableViewController {
             }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                spinner?.dismiss(animated: true, completion: {showAlertMessage("Результат сохранения")})
+                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
             }
         }
-        
         // кнопка отмены
         let cancelButton = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
         // добавляем кнопки в Alert Controller
@@ -108,29 +107,6 @@ class ChatsUserController: UITableViewController {
         alertController.addAction(createButton)
         // отображаем Alert Controller
         self.present(alertController, animated: true)
-    }
-    
-    func showAlertMessage (_ myTitle: String) {
-        let alert = UIAlertController(title: myTitle, message: (contact.sql.answerOnRequest ?? "Неизвестный ответ сервера"), preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    func startSpinner(myTitle: String = "") -> UIAlertController? {
-        //create an alert controller
-        let myAlert = UIAlertController(title: myTitle, message: "\n\n\n", preferredStyle: .alert)
-        //create an activity indicator
-        let spinner = UIActivityIndicatorView(frame: myAlert.view.bounds)
-        spinner.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        spinner.color = .systemBlue
-        spinner.style = .large
-        // required otherwise if there buttons in the UIAlertController you will not be able to press them
-        spinner.isUserInteractionEnabled = false
-        spinner.startAnimating()
-        //add the activity indicator as a subview of the alert controller's view
-        myAlert.view.addSubview(spinner)
-        self.present(myAlert, animated: true, completion: nil)
-        return myAlert
     }
     
     // MARK: - Table view data source

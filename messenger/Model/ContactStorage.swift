@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import UIKit
 
 protocol ContactStorageProtocol {
     func loadContactsFromDB(group: DispatchGroup)
-    func saveContactsToDB(_ contacts: [UserProtocol])
+    func saveContactToDB(group: DispatchGroup, telephone: String, name: String)
     
     func loadMyUser()
     func saveMyUser(_ user: UserProtocol)
@@ -116,6 +117,43 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func saveContactsToDB(_ contacts: [UserProtocol]) {
+    func saveContactToDB(group: DispatchGroup, telephone: String, name: String) {
+        if (self.contacts.filter{$0.telephone == telephone}.count == 0) {
+            //POST
+            sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), ["name":name, "telephone":telephone], "POST") { [self] in
+                let responseJSON = sql.responseJSON as? [String:String]
+                sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+                if sql.httpStatus?.statusCode == 200 {
+                    self.contacts.append(User(id: responseJSON?["id"], telephone: telephone, name: name))
+                    sql.answerOnRequest = "Новый контакт сохранён!"
+                    group.leave()
+                }
+            }
+        }
+        else { sql.answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
+    }
+    
+    //MARK: вывод на TableViewController элементов
+    func showAlertMessage (_ myTitle: String, _ myController: UITableViewController) {
+        let alert = UIAlertController(title: myTitle, message: (sql.answerOnRequest ?? "Неизвестный ответ сервера"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        myController.present(alert, animated: true, completion: nil)
+    }
+    
+    func startSpinner(_ myTitle: String = "", _ myController: UITableViewController) -> UIAlertController? {
+        //create an alert controller
+        let myAlert = UIAlertController(title: myTitle, message: "\n\n\n", preferredStyle: .alert)
+        //create an activity indicator
+        let spinner = UIActivityIndicatorView(frame: myAlert.view.bounds)
+        spinner.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        spinner.color = .systemBlue
+        spinner.style = .large
+        // required otherwise if there buttons in the UIAlertController you will not be able to press them
+        spinner.isUserInteractionEnabled = false
+        spinner.startAnimating()
+        //add the activity indicator as a subview of the alert controller's view
+        myAlert.view.addSubview(spinner)
+        myController.present(myAlert, animated: true, completion: nil)
+        return myAlert
     }
 }
