@@ -11,6 +11,7 @@ import UIKit
 protocol ContactStorageProtocol {
     func loadContactsFromDB(group: DispatchGroup)
     func saveContactToDB(group: DispatchGroup, telephone: String, name: String)
+    func deleteContactFromDB(group: DispatchGroup, contactID: Int)
     
     func loadMyUser()
     func saveMyUser(_ user: UserProtocol)
@@ -131,6 +132,18 @@ class ContactStorage: ContactStorageProtocol {
             }
         }
         else { sql.answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
+    }
+    
+    func deleteContactFromDB(group: DispatchGroup, contactID: Int) {
+        //DELETE
+        sql.sendRequest("contacts/" + (contacts[contactID].id ?? ""), [:], "DELETE"){ [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            if sql.httpStatus?.statusCode == 200 {
+                contacts.remove(at: contactID)
+                sql.answerOnRequest = "Контакт удалён!"
+                group.leave()
+            }
+        }
     }
     
     //MARK: вывод на TableViewController элементов

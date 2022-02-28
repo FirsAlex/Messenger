@@ -38,8 +38,19 @@ class ContactsController: UITableViewController {
         print("Contacts - viewWillAppear")
     }
     
+    //MARK: кнопка edit в режиме редактирования
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        
+        if !editing {
+            self.editButtonItem.title = "Изменить"
+        }
+        else {
+            self.editButtonItem.title = "Применить"
+        }
+    }
+    
     // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
@@ -49,7 +60,6 @@ class ContactsController: UITableViewController {
         // #warning Incomplete implementation, return the number of rows
         return self.contact.contacts.count
     }
-
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // загружаем прототип ячейки по идентификатору
@@ -98,6 +108,20 @@ class ContactsController: UITableViewController {
         alertController.addAction(createButton)
         // отображаем Alert Controller
         self.present(alertController, animated: true, completion: nil)
+    }
+    
+    //MARK: Обработка нажатия на иконку редактирования - в данном случае только delete (insert не обозначили)
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        spinner = contact.startSpinner("Удаление", self)
+        groupWaitResponseHttp.enter()
+        contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+            // удаляем строку, соответствующую задаче
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            tableView.reloadData()
+            spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", self)})
+        }
+          
     }
 
 }
