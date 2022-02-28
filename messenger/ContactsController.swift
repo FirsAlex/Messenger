@@ -78,9 +78,9 @@ class ContactsController: UITableViewController {
         let createButton = UIAlertAction(title: "Сохранить", style: .default) {[self] _ in
             guard let name = alertController.textFields?[0].text,
                   let telephone = alertController.textFields?[1].text else { return }
+            spinner = contact.startSpinner("Сохранение", self)
             // создаем новый контакт
             if name != "" && telephone != "" {
-                spinner = contact.startSpinner("Сохранение", self)
                 groupWaitResponseHttp.enter()
                 contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
             }
@@ -91,7 +91,6 @@ class ContactsController: UITableViewController {
                 spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
             }
         }
-        
         // кнопка отмены
         let cancelButton = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
         // добавляем кнопки в Alert Controller

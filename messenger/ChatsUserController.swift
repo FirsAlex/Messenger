@@ -81,9 +81,9 @@ class ChatsUserController: UITableViewController {
         let createButton = UIAlertAction(title: "Сохранить", style: .default) {[self] _ in
             guard let name = alertController.textFields?[0].text,
                   let telephone = alertController.textFields?[1].text else { return }
+            spinner = contact.startSpinner("Сохранение", self)
             // создаем новый контакт
             if name != "" && telephone != "" {
-                spinner = contact.startSpinner("Сохранение", self)
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
                     contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
