@@ -61,10 +61,10 @@ class ContactsController: UITableViewController {
     
     // MARK: создание/редактирование контакта для аккаунта текущего
     @IBAction func showNewContact() {
-        showContact()
+        editContact()
     }
 
-    func showContact(contactID: Int = -1) {
+    func editContact(contactID: Int = -1) {
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите имя и телефон контакта", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -119,7 +119,7 @@ class ContactsController: UITableViewController {
         }
         // действие изменить
         let actionEdit = UIContextualAction(style: .normal, title: "\u{270D}") { [self] _,_,_ in
-            showContact(contactID: indexPath.row)
+            editContact(contactID: indexPath.row)
         }
         // формируем экземпляр, описывающий доступные действия
         let actions = UISwipeActionsConfiguration(actions: [actionDelete, actionEdit])
