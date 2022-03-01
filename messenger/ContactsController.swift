@@ -64,17 +64,17 @@ class ContactsController: UITableViewController {
         editContact()
     }
 
-    func editContact(contactID: Int = -1) {
+    func editContact(contactID: Int? = nil) {
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите имя и телефон контакта", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
         alertController.addTextField { [self] textField in
             textField.placeholder = "Имя"
-            textField.text = (contactID != -1) ? contact.contacts[contactID].name : ""
+            textField.text = (contactID != nil) ? contact.contacts[contactID!].name : ""
         }
         alertController.addTextField { [self] textField in
             textField.placeholder = "Телефон"
-            textField.text = (contactID != -1) ? contact.contacts[contactID].telephone : ""
+            textField.text = (contactID != nil) ? contact.contacts[contactID!].telephone : ""
             textField.keyboardType = .phonePad
         }
         
@@ -86,7 +86,7 @@ class ContactsController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 groupWaitResponseHttp.enter()
-                (contactID == -1) ? contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) : contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID)
+                (contactID == nil) ? contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) : contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID)
             }
             else { contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!" }
             
@@ -107,7 +107,7 @@ class ContactsController: UITableViewController {
     //MARK: Обработка swipe влево - удаление
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         // действие удаления
-        let actionDelete = UIContextualAction(style: .normal, title: "\u{1F5D1}") { [self] _,_,_ in
+        let actionDelete = UIContextualAction(style: .destructive, title: "\u{1F5D1}") { [self] _,_,_ in
             spinner = contact.startSpinner("Удаление", self)
             groupWaitResponseHttp.enter()
             contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
