@@ -61,15 +61,21 @@ class ContactsController: UITableViewController {
     
     // MARK: создание контакта для аккаунта текущего
     @IBAction func showNewContact() {
+        showContact()
+    }
+
+    func showContact(contactID: Int = -1) {
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите имя и телефон нового контакта", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
         alertController.addTextField { textField in
-                                    textField.placeholder = "Имя"
+            textField.placeholder = "Имя"
+            textField.text = (contactID != -1) ? self.contact.contacts[contactID].name : ""
         }
         alertController.addTextField { textField in
-                                    textField.placeholder = "Телефон"
-                                    textField.keyboardType = .phonePad
+            textField.placeholder = "Телефон"
+            textField.text = (contactID != -1) ? self.contact.contacts[contactID].telephone : ""
+            textField.keyboardType = .phonePad
         }
         
         // кнопка создания контакта
@@ -80,7 +86,7 @@ class ContactsController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 groupWaitResponseHttp.enter()
-                contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
+                (contactID == -1) ? contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) : contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID)
             }
             else { contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!" }
             
@@ -111,8 +117,12 @@ class ContactsController: UITableViewController {
                 tableView.reloadData()
             }
         }
+        // действие изменить
+        let actionEdit = UIContextualAction(style: .normal, title: "\u{270D}") { [self] _,_,_ in
+            showContact(contactID: indexPath.row)
+        }
         // формируем экземпляр, описывающий доступные действия
-        let actions = UISwipeActionsConfiguration(actions: [actionDelete])
+        let actions = UISwipeActionsConfiguration(actions: [actionDelete, actionEdit])
         return actions
     }
 }

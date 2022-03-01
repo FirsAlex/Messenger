@@ -12,6 +12,7 @@ protocol ContactStorageProtocol {
     func loadContactsFromDB(group: DispatchGroup)
     func saveContactToDB(group: DispatchGroup, telephone: String, name: String)
     func deleteContactFromDB(group: DispatchGroup, contactID: Int)
+    func updateContactFromDB(group: DispatchGroup, telephone: String, name: String, contactID: Int)
     
     func loadMyUser()
     func saveMyUser(_ user: UserProtocol)
@@ -40,6 +41,7 @@ class ContactStorage: ContactStorageProtocol {
     init (){
     }
     
+    //MARK: работа с аккаунтом
     func saveMyUser(_ user: UserProtocol) {
         var newElementForStorage: Dictionary<String, String> = [:]
         newElementForStorage["telephone"] = user.telephone
@@ -98,6 +100,7 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
+    //MARK: работа с контактами аккаунта
     func loadContactsFromDB(group: DispatchGroup) {
         sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
@@ -125,7 +128,7 @@ class ContactStorage: ContactStorageProtocol {
                 let responseJSON = sql.responseJSON as? [String:Any]
                 sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
                 if sql.httpStatus?.statusCode == 200 {
-                    self.contacts.append(User(id: responseJSON?["id"] as? String, telephone: telephone, name: name))
+                    contacts.append(User(id: responseJSON?["id"] as? String, telephone: telephone, name: name))
                     sql.answerOnRequest = "Новый контакт сохранён!"
                     group.leave()
                 }
@@ -144,6 +147,22 @@ class ContactStorage: ContactStorageProtocol {
                 group.leave()
             }
         }
+    }
+    
+    func updateContactFromDB(group: DispatchGroup, telephone: String, name: String, contactID: Int) {
+        if (self.contacts.filter{$0.telephone == telephone}.count == 0) {
+            //PATCH
+            sql.sendRequest("contacts/" + (contacts[contactID].id ?? ""), ["name":name, "telephone":telephone], "PATCH") { [self] in
+                sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+                if sql.httpStatus?.statusCode == 200 {
+                    contacts[contactID].name = name
+                    contacts[contactID].telephone = telephone
+                    sql.answerOnRequest = "Контакт изменён!"
+                    group.leave()
+                }
+            }
+        }
+        else { sql.answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
     }
     
     //MARK: вывод на TableViewController элементов
