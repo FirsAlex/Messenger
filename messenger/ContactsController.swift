@@ -59,7 +59,7 @@ class ContactsController: UITableViewController {
         return cell
     }
     
-    // MARK: создание контакта для аккаунта текущего
+    // MARK: создание/редактирование контакта для аккаунта текущего
     @IBAction func showNewContact() {
         showContact()
     }
@@ -68,13 +68,13 @@ class ContactsController: UITableViewController {
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите имя и телефон контакта", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
-        alertController.addTextField { textField in
+        alertController.addTextField { [self] textField in
             textField.placeholder = "Имя"
-            textField.text = (contactID != -1) ? self.contact.contacts[contactID].name : ""
+            textField.text = (contactID != -1) ? contact.contacts[contactID].name : ""
         }
-        alertController.addTextField { textField in
+        alertController.addTextField { [self] textField in
             textField.placeholder = "Телефон"
-            textField.text = (contactID != -1) ? self.contact.contacts[contactID].telephone : ""
+            textField.text = (contactID != -1) ? contact.contacts[contactID].telephone : ""
             textField.keyboardType = .phonePad
         }
         

@@ -150,7 +150,8 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     func updateContactFromDB(group: DispatchGroup, telephone: String, name: String, contactID: Int) {
-        if (self.contacts.firstIndex(where: {$0.telephone == telephone}) == contactID) {
+        let indexFind = self.contacts.firstIndex(where: {$0.telephone == telephone})
+        if (indexFind == contactID || indexFind == nil) {
             //PATCH
             sql.sendRequest("contacts/" + (contacts[contactID].id ?? ""), ["name":name, "telephone":telephone], "PATCH") { [self] in
                 sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
