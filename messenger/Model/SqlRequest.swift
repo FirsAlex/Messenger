@@ -13,7 +13,7 @@ protocol SqlRequestProtocol {
     var httpStatus: HTTPURLResponse? { get set }
     var answerOnRequest: String? { get set }
     func answerOnRequestError(group: DispatchGroup, statusCode: Int?)
-    func sendRequest(_ myUrlRoute: String, _ json: [String: Any?], _ httpMethod: String,
+    func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
                      _ completion: @escaping () -> Void)
 }
 
@@ -25,7 +25,7 @@ class SqlRequest: SqlRequestProtocol{
     init() {
     }
     
-    func sendRequest(_ myUrlRoute: String = "", _ json: [String: Any?] = [:], _ httpMethod: String,
+    func sendRequest(_ myUrlRoute: String = "", _ json: [String: Any] = [:], _ httpMethod: String,
                      _ completion: @escaping () -> Void) {
         // create request
         let url = URL(string: "https://server.firsalex.keenetic.name/\(myUrlRoute)")!
