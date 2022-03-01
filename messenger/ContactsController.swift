@@ -86,7 +86,7 @@ class ContactsController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 groupWaitResponseHttp.enter()
-                (contactID == nil) ? contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) : contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID)
+                (contactID == nil) ? contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) : contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID!)
             }
             else { contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!" }
             
