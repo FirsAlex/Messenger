@@ -163,7 +163,6 @@ class ContactStorage: ContactStorageProtocol {
             }
         }
         else { sql.answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
-        
     }
     
     //MARK: вывод на TableViewController элементов
