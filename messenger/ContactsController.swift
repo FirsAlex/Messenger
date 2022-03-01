@@ -66,7 +66,7 @@ class ContactsController: UITableViewController {
 
     func showContact(contactID: Int = -1) {
         // создание Alert Controller
-        let alertController = UIAlertController(title: "Введите имя и телефон нового контакта", message: "(обязательные поля)", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "Введите имя и телефон контакта", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
         alertController.addTextField { textField in
             textField.placeholder = "Имя"

@@ -150,7 +150,7 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     func updateContactFromDB(group: DispatchGroup, telephone: String, name: String, contactID: Int) {
-        if (self.contacts.filter{$0.telephone == telephone}.count == 0) {
+        if (self.contacts.firstIndex(where: {$0.telephone == telephone}) == contactID) {
             //PATCH
             sql.sendRequest("contacts/" + (contacts[contactID].id ?? ""), ["name":name, "telephone":telephone], "PATCH") { [self] in
                 sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
@@ -163,6 +163,7 @@ class ContactStorage: ContactStorageProtocol {
             }
         }
         else { sql.answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
+        
     }
     
     //MARK: вывод на TableViewController элементов
