@@ -3,6 +3,8 @@
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -21,27 +23,91 @@
                         </connections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem title="Учётная запись" image="person.fill" catalog="system" id="Qvq-4j-16y" userLabel="Account">
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="B8e-Ea-gRY"/>
+                        <barButtonItem title="Учётная запись" id="Qvq-4j-16y" userLabel="Account">
+                            <imageReference key="image" image="person.fill" catalog="system" symbolScale="large"/>
                             <connections>
                                 <action selector="showMyContact" destination="4Np-A4-DTZ" id="qCA-Ck-BOa"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="VX0-ce-nNe"/>
-                        <barButtonItem title="Контакты" image="book" catalog="system" id="cPn-YK-XDJ" userLabel="Contacts">
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="QgN-O3-175"/>
+                    </toolbarItems>
+                    <navigationItem key="navigationItem" title="Чаты" id="Dun-rj-IZm">
+                        <barButtonItem key="rightBarButtonItem" title="Контакты" id="cPn-YK-XDJ" userLabel="Contacts">
+                            <imageReference key="image" image="square.and.pencil" catalog="system" symbolScale="large"/>
                             <connections>
                                 <segue destination="o19-yf-gkj" kind="show" id="bgf-rn-qhf"/>
                             </connections>
                         </barButtonItem>
-                    </toolbarItems>
-                    <navigationItem key="navigationItem" title="Чаты" id="Dun-rj-IZm">
-                        <barButtonItem key="leftBarButtonItem" title="Назад" id="Fbd-Re-VcC"/>
-                        <barButtonItem key="rightBarButtonItem" systemItem="compose" id="Qqr-rh-Mr5"/>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EN4-9d-Ro6" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="814.49275362318849" y="79.6875"/>
+            <point key="canvasLocation" x="765" y="62"/>
+        </scene>
+        <!--Чат-->
+        <scene sceneID="cAK-mi-KvJ">
+            <objects>
+                <viewController storyboardIdentifier="ChatController" title="Чат" id="7gT-md-46z" customClass="ChatController" customModule="messenger" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="XDd-VO-eSx">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" verticalHuggingPriority="251" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Ud7-ji-WQd">
+                                <rect key="frame" x="0.0" y="88" width="414" height="725"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="7gT-md-46z" id="EWO-iR-F1y"/>
+                                    <outlet property="delegate" destination="7gT-md-46z" id="x38-BL-WD9"/>
+                                </connections>
+                            </tableView>
+                            <stackView opaque="NO" contentMode="scaleToFill" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IzC-7B-1Yf">
+                                <rect key="frame" x="10" y="818" width="404" height="68"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Сообщение..." minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="TND-Qm-stR">
+                                        <rect key="frame" x="0.0" y="0.0" width="357.5" height="68"/>
+                                        <nil key="textColor"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t5P-kC-eVq">
+                                        <rect key="frame" x="357.5" y="0.0" width="46.5" height="68"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" image="paperplane.fill" catalog="system"/>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="cz9-0N-RA4"/>
+                        <color key="backgroundColor" systemColor="systemGray6Color"/>
+                        <constraints>
+                            <constraint firstItem="cz9-0N-RA4" firstAttribute="bottom" secondItem="Ud7-ji-WQd" secondAttribute="bottom" id="89i-wf-ENe"/>
+                            <constraint firstAttribute="trailing" secondItem="IzC-7B-1Yf" secondAttribute="trailing" id="8qj-Uk-k92"/>
+                            <constraint firstItem="IzC-7B-1Yf" firstAttribute="top" secondItem="Ud7-ji-WQd" secondAttribute="bottom" constant="5" id="A0i-SM-NbK"/>
+                            <constraint firstAttribute="bottom" secondItem="IzC-7B-1Yf" secondAttribute="bottom" constant="10" id="PDK-RJ-kAZ"/>
+                            <constraint firstItem="IzC-7B-1Yf" firstAttribute="leading" secondItem="XDd-VO-eSx" secondAttribute="leading" constant="10" id="gln-K7-YoD"/>
+                            <constraint firstItem="Ud7-ji-WQd" firstAttribute="top" secondItem="cz9-0N-RA4" secondAttribute="top" id="h75-ng-1ip"/>
+                            <constraint firstItem="Ud7-ji-WQd" firstAttribute="leading" secondItem="cz9-0N-RA4" secondAttribute="leading" id="kJh-Qg-wjU"/>
+                            <constraint firstItem="Ud7-ji-WQd" firstAttribute="trailing" secondItem="cz9-0N-RA4" secondAttribute="trailing" id="kZH-Qp-qal"/>
+                        </constraints>
+                    </view>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Title" id="gHy-az-AYK">
+                        <barButtonItem key="rightBarButtonItem" title="Чаты" id="voH-t3-YRP">
+                            <connections>
+                                <action selector="toRootScreen:" destination="7gT-md-46z" id="Jui-Vb-vNk"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="tableView" destination="Ud7-ji-WQd" id="ikd-g1-4Nb"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="TcO-yt-Dxt" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="764" y="753"/>
         </scene>
         <!--Контакты-->
         <scene sceneID="jhY-VQ-3t6">
@@ -66,7 +132,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sTR-Wq-AHF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1600" y="80"/>
+            <point key="canvasLocation" x="1648" y="62"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="4sU-dP-6jI">
@@ -88,15 +154,19 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="J6u-An-InC" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-95.652173913043484" y="79.6875"/>
+            <point key="canvasLocation" x="-103" y="62"/>
         </scene>
     </scenes>
     <resources>
-        <image name="book" catalog="system" width="128" height="99"/>
+        <image name="paperplane.fill" catalog="system" width="128" height="118"/>
         <image name="person.fill" catalog="system" width="128" height="120"/>
         <image name="person.fill.badge.plus" catalog="system" width="128" height="124"/>
+        <image name="square.and.pencil" catalog="system" width="128" height="115"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray6Color">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

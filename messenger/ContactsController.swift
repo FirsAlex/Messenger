@@ -125,4 +125,13 @@ class ContactsController: UITableViewController {
         let actions = UISwipeActionsConfiguration(actions: [actionDelete, actionEdit])
         return actions
     }
+    
+    //MARK: обработка выделения строки
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let chatScreen = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ChatController") as! ChatController
+        chatScreen.navigationItem.title = (tableView.cellForRow(at: indexPath) as! ContactsCell).nameContact.text
+        // переход к экрану редактирования
+        self.navigationController?.pushViewController(chatScreen, animated: true)
+    }
+    
 }
