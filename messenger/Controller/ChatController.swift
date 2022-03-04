@@ -71,7 +71,6 @@ extension ChatController: UITableViewDelegate {
 
 }
 
-
 //MARK: - расширение TableView
 extension UITableView {
 

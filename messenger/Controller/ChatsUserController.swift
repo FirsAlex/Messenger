@@ -39,12 +39,12 @@ class ChatsUserController: UITableViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        //self.navigationController!.isToolbarHidden = true
+        self.navigationController!.isToolbarHidden = true
         print("Chats - viewWillDisappear")
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        //self.navigationController!.isToolbarHidden = false
+        self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
         print("Chats - viewWillAppear")
