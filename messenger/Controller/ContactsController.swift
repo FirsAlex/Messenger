@@ -18,7 +18,7 @@ class ContactsController: UITableViewController {
     
     override func loadView() {
         super.loadView()
-        print("Contacts - loadView")
+        print("ContactsController - loadView")
     }
     
     override func viewDidLoad() {
@@ -27,15 +27,15 @@ class ContactsController: UITableViewController {
         let chatsCellNib = UINib(nibName: "ContactsCell", bundle: nil)
         //регистрация кастомной ячейки в табличном представлении
         tableView.register(chatsCellNib, forCellReuseIdentifier: "ContactsCell")
-        print("Contacts - viewDidLoad")
+        print("ContactsController - viewDidLoad")
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        print("Contacts - viewWillDisappear")
+        print("ContactsController - viewWillDisappear")
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        print("Contacts - viewWillAppear")
+        print("ContactsController - viewWillAppear")
     }
     
     // MARK: - Table view data source

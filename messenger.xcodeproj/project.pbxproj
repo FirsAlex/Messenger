@@ -82,14 +82,11 @@
 		6159119B27B1AC1A0039AA65 /* messenger */ = {
 			isa = PBXGroup;
 			children = (
+				61DA456D27D247090038B37C /* Controller */,
 				61D9F33D27B250BF00A46EBE /* Model */,
 				61D9F33C27B250B600A46EBE /* View */,
-				615911B027B1AE0B0039AA65 /* ChatsUserController.swift */,
-				61ED153727B3B8B5001C73E4 /* ContactsController.swift */,
 				6159119E27B1AC1A0039AA65 /* SceneDelegate.swift */,
-				6171496027D11181007522D3 /* ChatController.swift */,
 				6159119C27B1AC1A0039AA65 /* AppDelegate.swift */,
-				615911A227B1AC1A0039AA65 /* Main.storyboard */,
 				615911A527B1AC1D0039AA65 /* Assets.xcassets */,
 				615911A727B1AC1D0039AA65 /* LaunchScreen.storyboard */,
 				615911AA27B1AC1D0039AA65 /* Info.plist */,
@@ -108,6 +105,7 @@
 				61D9F34727B2548F00A46EBE /* MessageFromUserCell.xib */,
 				61ED153127B3B634001C73E4 /* ContactsCell.swift */,
 				61ED153227B3B634001C73E4 /* ContactsCell.xib */,
+				615911A227B1AC1A0039AA65 /* Main.storyboard */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -120,6 +118,16 @@
 				61BC178727B2B5910028BD61 /* ContactStorage.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		61DA456D27D247090038B37C /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				615911B027B1AE0B0039AA65 /* ChatsUserController.swift */,
+				61ED153727B3B8B5001C73E4 /* ContactsController.swift */,
+				6171496027D11181007522D3 /* ChatController.swift */,
+			);
+			path = Controller;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
