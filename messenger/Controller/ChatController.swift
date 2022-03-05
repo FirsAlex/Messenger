@@ -20,9 +20,10 @@ class ChatController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         //получение значение типа UINib, соответствующее xib-файлу кастомной ячейки
-        let chatsCellNib = UINib(nibName: "MessageToUserCell", bundle: nil)
-        //регистрация кастомной ячейки в табличном представлении
-        tableView.register(chatsCellNib, forCellReuseIdentifier: "MessageToUserCell")
+        let incommingCellNib = UINib(nibName: "MessageToUserCell", bundle: nil)
+        tableView.register(incommingCellNib, forCellReuseIdentifier: "MessageToUserCell")
+        let outgoingCellNib = UINib(nibName: "MessageFromUserCell", bundle: nil)
+        tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
         print("ChatController - viewDidLoad")
     }
@@ -78,12 +79,22 @@ extension ChatController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //получение переиспользуемой кастомной ячейки по ее идентификатору
-        let incommingCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
-        //заполняем ячейку данными
-        incommingCell.incommingText.text = "\(indexPath.row) Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
-        incommingCell.incommingTime.text = "22:20"
-        return incommingCell
+    var chatCell: UITableViewCell!
+        
+        if indexPath.row % 2 == 0 {
+            //получение переиспользуемой кастомной ячейки по ее идентификатору
+            chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath)
+            (chatCell as! MessageToUserCell).incommingText.text = "\(indexPath.row) Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
+            (chatCell as! MessageToUserCell).incommingTime.text = "22:20"
+        }
+        else {
+            chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath)
+            (chatCell as! MessageFromUserCell).outgoingText.text = "\(indexPath.row) Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
+            (chatCell as! MessageFromUserCell).outgoingTime.text = "22:21"
+            (chatCell as! MessageFromUserCell).symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
+        }
+        
+        return chatCell
     }
 }
 

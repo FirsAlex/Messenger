@@ -8,7 +8,10 @@
 import UIKit
 
 class MessageFromUserCell: UITableViewCell {
-
+    @IBOutlet weak var outgoingText: UILabel!
+    @IBOutlet weak var outgoingTime: UILabel!
+    @IBOutlet weak var symbol: UILabel!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

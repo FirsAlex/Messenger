@@ -27,7 +27,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="22:20" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wnL-jf-wg0">
-                                <rect key="frame" x="227" y="41.5" width="31" height="13.5"/>
+                                <rect key="frame" x="227" y="41" width="31" height="14"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="31" id="Yct-XG-9Be"/>
                                 </constraints>
@@ -38,9 +38,9 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="wnL-jf-wg0" firstAttribute="leading" secondItem="XkM-Ke-rMm" secondAttribute="trailing" id="Bj0-5E-lxL"/>
                             <constraint firstItem="XkM-Ke-rMm" firstAttribute="top" secondItem="6h9-We-CoU" secondAttribute="topMargin" id="LM9-rC-mcr"/>
                             <constraint firstAttribute="bottomMargin" secondItem="wnL-jf-wg0" secondAttribute="bottom" id="Lcl-tx-O5Y"/>
-                            <constraint firstItem="wnL-jf-wg0" firstAttribute="leading" secondItem="XkM-Ke-rMm" secondAttribute="trailing" id="Ov1-bK-DCX"/>
                             <constraint firstItem="XkM-Ke-rMm" firstAttribute="leading" secondItem="6h9-We-CoU" secondAttribute="leadingMargin" id="fBN-Mf-G9n"/>
                             <constraint firstAttribute="trailingMargin" secondItem="wnL-jf-wg0" secondAttribute="trailing" id="gfM-Z7-Bwm"/>
                             <constraint firstAttribute="bottomMargin" secondItem="XkM-Ke-rMm" secondAttribute="bottom" id="yJe-oj-WMl"/>
