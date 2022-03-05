@@ -45,6 +45,11 @@
                             <constraint firstAttribute="trailingMargin" secondItem="wnL-jf-wg0" secondAttribute="trailing" id="gfM-Z7-Bwm"/>
                             <constraint firstAttribute="bottomMargin" secondItem="XkM-Ke-rMm" secondAttribute="bottom" id="yJe-oj-WMl"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="20"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" systemColor="systemGray6Color"/>
@@ -59,7 +64,6 @@
             <connections>
                 <outlet property="incommingText" destination="XkM-Ke-rMm" id="beZ-cU-bVY"/>
                 <outlet property="incommingTime" destination="wnL-jf-wg0" id="uoV-ZU-Sp0"/>
-                <outlet property="viewIncomming" destination="6h9-We-CoU" id="ajS-Lc-wxh"/>
             </connections>
             <point key="canvasLocation" x="185.50724637681162" y="124.21875"/>
         </tableViewCell>
