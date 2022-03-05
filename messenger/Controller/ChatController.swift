@@ -9,7 +9,7 @@ import UIKit
 
 class ChatController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var dataTextField: UITextField!
+    @IBOutlet weak var dataTextField: UITextView!
     @IBOutlet weak var scrollView: UIScrollView!
     
     deinit{
