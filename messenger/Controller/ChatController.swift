@@ -27,7 +27,7 @@ class ChatController: UIViewController {
         registerForKeyboardNotifications()
         
         dataTextField.layer.borderColor = UIColor.lightGray.cgColor
-        dataTextField.layer.cornerRadius = 10
+        dataTextField.layer.cornerRadius = 15
         dataTextField.layer.borderWidth = 0.5
         print("ChatController - viewDidLoad")
     }
