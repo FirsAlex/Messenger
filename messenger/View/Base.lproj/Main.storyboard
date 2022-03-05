@@ -46,10 +46,10 @@
             </objects>
             <point key="canvasLocation" x="765" y="62"/>
         </scene>
-        <!--Title-->
+        <!--Чат-->
         <scene sceneID="eJh-Jx-w80">
             <objects>
-                <viewController storyboardIdentifier="ChatController" id="Zrl-6j-3hJ" customClass="ChatController" customModule="messenger" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ChatController" title="Чат" id="Zrl-6j-3hJ" customClass="ChatController" customModule="messenger" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="WUM-Js-rdJ">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -61,7 +61,7 @@
                                         <rect key="frame" x="8" y="8" width="398" height="709"/>
                                         <subviews>
                                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bVs-cF-emQ">
-                                                <rect key="frame" x="0.0" y="0.0" width="398" height="607"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="398" height="624"/>
                                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <connections>
                                                     <outlet property="dataSource" destination="Zrl-6j-3hJ" id="ZiF-tr-B5Z"/>
@@ -69,18 +69,16 @@
                                                 </connections>
                                             </tableView>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QWS-qm-AB6">
-                                                <rect key="frame" x="0.0" y="612" width="398" height="97"/>
+                                                <rect key="frame" x="0.0" y="629" width="398" height="80"/>
                                                 <subviews>
-                                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" horizontalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="NCc-z8-7ZB">
-                                                        <rect key="frame" x="0.0" y="0.0" width="351.5" height="97"/>
+                                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" horizontalHuggingPriority="249" text=" Ваывавы выавыаы ывавыа ывавыыа ывавыавыаваыва выававыаыв вававыавыаыаы ываываыа  ывааывавыав ваываыввыаывава   " translatesAutoresizingMaskIntoConstraints="NO" id="NCc-z8-7ZB">
+                                                        <rect key="frame" x="0.0" y="0.0" width="351.5" height="80"/>
                                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                        <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
-                                                        <color key="textColor" systemColor="labelColor"/>
-                                                        <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="15"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                     </textView>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H98-9o-fZ7">
-                                                        <rect key="frame" x="351.5" y="0.0" width="46.5" height="97"/>
+                                                        <rect key="frame" x="351.5" y="0.0" width="46.5" height="80"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="plain">
                                                             <imageReference key="image" image="paperplane.fill" catalog="system" symbolScale="large"/>
@@ -90,6 +88,9 @@
                                                         </connections>
                                                     </button>
                                                 </subviews>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="80" id="lQQ-E5-CCd"/>
+                                                </constraints>
                                             </stackView>
                                         </subviews>
                                     </stackView>
@@ -185,9 +186,6 @@
         <image name="person.fill" catalog="system" width="128" height="120"/>
         <image name="person.fill.badge.plus" catalog="system" width="128" height="124"/>
         <image name="square.and.pencil" catalog="system" width="128" height="115"/>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

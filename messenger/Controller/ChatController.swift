@@ -25,6 +25,10 @@ class ChatController: UIViewController {
         tableView.register(chatsCellNib, forCellReuseIdentifier: "ChatsCell")
         
         registerForKeyboardNotifications()
+        
+        dataTextField.layer.borderColor = UIColor.lightGray.cgColor
+        dataTextField.layer.cornerRadius = 10
+        dataTextField.layer.borderWidth = 0.5
         print("ChatController - viewDidLoad")
     }
     
@@ -92,7 +96,8 @@ extension ChatController: UITableViewDataSource {
 
 // MARK: - делегирование ChatController
 extension ChatController: UITableViewDelegate {
-    //MARK: обработка выделения строки
+    
+    //обработка выделения строки
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         dataTextField.resignFirstResponder()
         // снимаем выделение со строки
