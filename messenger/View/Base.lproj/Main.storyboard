@@ -54,61 +54,60 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cT4-J6-8dy">
-                                <rect key="frame" x="0.0" y="88" width="414" height="808"/>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cT4-J6-8dy">
+                                <rect key="frame" x="0.0" y="88" width="414" height="774"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JaV-jf-w8P">
-                                        <rect key="frame" x="10" y="759" width="404" height="34"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="0yI-le-8dY">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="774"/>
                                         <subviews>
-                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P1M-KF-HlP">
-                                                <rect key="frame" x="0.0" y="0.0" width="357.5" height="34"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <textInputTraits key="textInputTraits"/>
-                                            </textField>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mdx-KL-l9n">
-                                                <rect key="frame" x="357.5" y="0.0" width="46.5" height="34"/>
-                                                <state key="normal" title="Button"/>
-                                                <buttonConfiguration key="configuration" style="plain">
-                                                    <imageReference key="image" image="paperplane.fill" catalog="system" symbolScale="large"/>
-                                                </buttonConfiguration>
+                                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bVs-cF-emQ">
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="735"/>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 <connections>
-                                                    <action selector="send" destination="Zrl-6j-3hJ" eventType="touchUpInside" id="Qyn-tq-jVp"/>
+                                                    <outlet property="dataSource" destination="Zrl-6j-3hJ" id="ZiF-tr-B5Z"/>
+                                                    <outlet property="delegate" destination="Zrl-6j-3hJ" id="SyS-Dv-GSO"/>
                                                 </connections>
-                                            </button>
+                                            </tableView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QWS-qm-AB6">
+                                                <rect key="frame" x="0.0" y="740" width="414" height="34"/>
+                                                <subviews>
+                                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Сообщение ..." minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="W64-Nu-JN5">
+                                                        <rect key="frame" x="0.0" y="0.0" width="367.5" height="34"/>
+                                                        <nil key="textColor"/>
+                                                        <textInputTraits key="textInputTraits"/>
+                                                    </textField>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H2g-wf-sAP">
+                                                        <rect key="frame" x="367.5" y="0.0" width="46.5" height="34"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="plain">
+                                                            <imageReference key="image" image="paperplane.fill" catalog="system" symbolScale="large"/>
+                                                        </buttonConfiguration>
+                                                        <connections>
+                                                            <action selector="send" destination="Zrl-6j-3hJ" eventType="touchUpInside" id="OWf-GM-XZr"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </stackView>
                                         </subviews>
                                     </stackView>
-                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="iFA-nc-UWT">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="749"/>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                        <connections>
-                                            <outlet property="dataSource" destination="Zrl-6j-3hJ" id="MPk-Mb-Xtq"/>
-                                            <outlet property="delegate" destination="Zrl-6j-3hJ" id="hcd-Op-x19"/>
-                                        </connections>
-                                    </tableView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="iFA-nc-UWT" secondAttribute="trailing" id="1bp-AY-x3x"/>
-                                    <constraint firstItem="u2X-xs-SWb" firstAttribute="trailing" secondItem="JaV-jf-w8P" secondAttribute="trailing" id="Bcy-1M-kzY"/>
-                                    <constraint firstItem="u2X-xs-SWb" firstAttribute="bottom" secondItem="JaV-jf-w8P" secondAttribute="bottom" constant="15" id="DBy-mj-PbK"/>
-                                    <constraint firstItem="JaV-jf-w8P" firstAttribute="top" secondItem="iFA-nc-UWT" secondAttribute="bottom" constant="10" id="Jex-fb-w6E"/>
-                                    <constraint firstItem="JaV-jf-w8P" firstAttribute="leading" secondItem="u2X-xs-SWb" secondAttribute="leading" constant="10" id="O8W-g5-h8w"/>
-                                    <constraint firstAttribute="bottom" secondItem="JaV-jf-w8P" secondAttribute="bottom" constant="15" id="S34-Sx-oDA"/>
-                                    <constraint firstItem="iFA-nc-UWT" firstAttribute="trailing" secondItem="u2X-xs-SWb" secondAttribute="trailing" id="S9c-Ne-TlL"/>
-                                    <constraint firstItem="iFA-nc-UWT" firstAttribute="leading" secondItem="u2X-xs-SWb" secondAttribute="leading" id="hUU-fv-BNj"/>
-                                    <constraint firstItem="iFA-nc-UWT" firstAttribute="top" secondItem="u2X-xs-SWb" secondAttribute="top" id="xzX-QO-E4V"/>
+                                    <constraint firstItem="0yI-le-8dY" firstAttribute="top" secondItem="cT4-J6-8dy" secondAttribute="top" id="Fs3-AM-8P5"/>
+                                    <constraint firstAttribute="trailing" secondItem="0yI-le-8dY" secondAttribute="trailing" id="RjQ-pS-TE5"/>
+                                    <constraint firstItem="0yI-le-8dY" firstAttribute="centerY" secondItem="cT4-J6-8dy" secondAttribute="centerY" id="lVL-kD-wab"/>
+                                    <constraint firstItem="0yI-le-8dY" firstAttribute="centerX" secondItem="cT4-J6-8dy" secondAttribute="centerX" id="lsC-1e-hn0"/>
+                                    <constraint firstItem="0yI-le-8dY" firstAttribute="leading" secondItem="cT4-J6-8dy" secondAttribute="leading" id="vmL-EX-XkP"/>
+                                    <constraint firstAttribute="bottom" secondItem="0yI-le-8dY" secondAttribute="bottom" id="zUm-C4-G64"/>
                                 </constraints>
-                                <viewLayoutGuide key="contentLayoutGuide" id="Q2F-9F-egX"/>
-                                <viewLayoutGuide key="frameLayoutGuide" id="u2X-xs-SWb"/>
                             </scrollView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Gkc-m2-jeA"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="cT4-J6-8dy" firstAttribute="trailing" secondItem="Gkc-m2-jeA" secondAttribute="trailing" id="1wJ-7n-y7F"/>
-                            <constraint firstItem="cT4-J6-8dy" firstAttribute="leading" secondItem="Gkc-m2-jeA" secondAttribute="leading" id="7Kb-qi-uMZ"/>
-                            <constraint firstItem="cT4-J6-8dy" firstAttribute="centerX" secondItem="WUM-Js-rdJ" secondAttribute="centerX" id="aDl-wu-7XQ"/>
-                            <constraint firstItem="cT4-J6-8dy" firstAttribute="top" secondItem="Gkc-m2-jeA" secondAttribute="top" id="twL-2R-enQ"/>
-                            <constraint firstAttribute="bottom" secondItem="cT4-J6-8dy" secondAttribute="bottom" id="y6K-Gz-h0Z"/>
+                            <constraint firstItem="cT4-J6-8dy" firstAttribute="trailing" secondItem="Gkc-m2-jeA" secondAttribute="trailing" id="HOt-W6-eos"/>
+                            <constraint firstItem="cT4-J6-8dy" firstAttribute="bottom" secondItem="Gkc-m2-jeA" secondAttribute="bottom" id="anN-Dn-J5F"/>
+                            <constraint firstItem="cT4-J6-8dy" firstAttribute="leading" secondItem="Gkc-m2-jeA" secondAttribute="leading" id="gL5-lA-xx5"/>
+                            <constraint firstItem="cT4-J6-8dy" firstAttribute="top" secondItem="Gkc-m2-jeA" secondAttribute="top" id="nOh-XP-eyc"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Title" id="gHy-az-AYK">
@@ -121,8 +120,9 @@
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="dataTextField" destination="P1M-KF-HlP" id="Hr4-hw-Bpy"/>
-                        <outlet property="tableView" destination="iFA-nc-UWT" id="cq2-X9-UgV"/>
+                        <outlet property="dataTextField" destination="W64-Nu-JN5" id="VT9-3G-uxu"/>
+                        <outlet property="scrollView" destination="cT4-J6-8dy" id="22M-wZ-KiY"/>
+                        <outlet property="tableView" destination="bVs-cF-emQ" id="4A0-cv-BiG"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DCz-Xd-Akd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
