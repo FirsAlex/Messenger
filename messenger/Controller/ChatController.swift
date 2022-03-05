@@ -20,9 +20,9 @@ class ChatController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         //получение значение типа UINib, соответствующее xib-файлу кастомной ячейки
-        let chatsCellNib = UINib(nibName: "ChatsCell", bundle: nil)
+        let chatsCellNib = UINib(nibName: "MessageToUserCell", bundle: nil)
         //регистрация кастомной ячейки в табличном представлении
-        tableView.register(chatsCellNib, forCellReuseIdentifier: "ChatsCell")
+        tableView.register(chatsCellNib, forCellReuseIdentifier: "MessageToUserCell")
         
         registerForKeyboardNotifications()
         
@@ -66,7 +66,7 @@ class ChatController: UIViewController {
     @objc func kbWillShow(_ notification: Notification) {
         let userInfo = notification.userInfo
         let kbFrameSize = (userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-        scrollView.contentOffset = CGPoint(x: 0, y: kbFrameSize.height) //
+        scrollView.contentOffset = CGPoint(x: 0, y: kbFrameSize.height)
     }
     
     @objc func kbWillHide() {
@@ -84,13 +84,11 @@ extension ChatController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //получение переиспользуемой кастомной ячейки по ее идентификатору
-        let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
+        let incommingCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
         //заполняем ячейку данными
-        chatsCell.nameContact.text = "Юлька \(indexPath.row)"
-        chatsCell.lastMessageTime.text = "01.02.2022"
-        chatsCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
-        chatsCell.lastMessage.text = "Вы: Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
-        return chatsCell
+        incommingCell.incommingText.text = "\(indexPath.row) Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
+        incommingCell.incommingTime.text = "22:20"
+        return incommingCell
     }
 }
 
@@ -107,7 +105,12 @@ extension ChatController: UITableViewDelegate {
 
 //MARK: - расширение TableView
 extension UITableView {
-
+    
+    func hasRowAtIndexPath(indexPath: IndexPath) -> Bool {
+        return indexPath.section < self.numberOfSections && indexPath.row < self.numberOfRows(inSection: indexPath.section)
+        && self.numberOfRows(inSection: indexPath.section) > 0
+    }
+    
     func scrollToBottom(isAnimated: Bool = false){
         DispatchQueue.main.async {
             let indexPath = IndexPath(
@@ -127,9 +130,5 @@ extension UITableView {
            }
         }
     }
-
-    func hasRowAtIndexPath(indexPath: IndexPath) -> Bool {
-        return indexPath.section < self.numberOfSections && indexPath.row < self.numberOfRows(inSection: indexPath.section)
-        && self.numberOfRows(inSection: indexPath.section) > 0
-    }
+    
 }
