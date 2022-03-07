@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6114618227D6344C0039F5E2 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6114618127D6344C0039F5E2 /* Message.swift */; };
 		6159119D27B1AC1A0039AA65 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159119C27B1AC1A0039AA65 /* AppDelegate.swift */; };
 		6159119F27B1AC1A0039AA65 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6159119E27B1AC1A0039AA65 /* SceneDelegate.swift */; };
 		615911A427B1AC1A0039AA65 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 615911A227B1AC1A0039AA65 /* Main.storyboard */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6114618127D6344C0039F5E2 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		6159119927B1AC1A0039AA65 /* messenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = messenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6159119C27B1AC1A0039AA65 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6159119E27B1AC1A0039AA65 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				61BC178527B2B0AF0028BD61 /* User.swift */,
+				6114618127D6344C0039F5E2 /* Message.swift */,
 				61A8427C27BF709000D9495F /* SqlRequest.swift */,
 				61BC178727B2B5910028BD61 /* ContactStorage.swift */,
 			);
@@ -214,6 +217,7 @@
 				61ED153327B3B634001C73E4 /* ContactsCell.swift in Sources */,
 				61ED153827B3B8B5001C73E4 /* ContactsController.swift in Sources */,
 				6159119F27B1AC1A0039AA65 /* SceneDelegate.swift in Sources */,
+				6114618227D6344C0039F5E2 /* Message.swift in Sources */,
 				615911B127B1AE0B0039AA65 /* ChatsUserController.swift in Sources */,
 				61BC178627B2B0AF0028BD61 /* User.swift in Sources */,
 				6171496127D11181007522D3 /* ChatController.swift in Sources */,

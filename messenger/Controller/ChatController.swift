@@ -11,6 +11,8 @@ class ChatController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var dataTextField: UITextView!
     @IBOutlet weak var scrollView: UIScrollView!
+    var contact = ContactStorage.shared
+    var contactIndex: Int?
     
     deinit{
         removeForKeyboardNotifications()

@@ -27,6 +27,8 @@ class ContactStorage: ContactStorageProtocol {
     let sql = SqlRequest()
     
     var contacts: [UserProtocol] = []
+    var messages: [MessageType:[Message]] = [:]
+    
     var myUser: UserProtocol? {
         didSet {
             self.saveMyUser(myUser!)
