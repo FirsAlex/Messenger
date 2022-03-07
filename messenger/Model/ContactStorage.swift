@@ -20,6 +20,9 @@ protocol ContactStorageProtocol {
     func getMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
     func postMyUserToDB(group: DispatchGroup, telephone: String, name: String)
     func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
+    
+    func sendMessage(group: DispatchGroup, telephone: String, text: String)
+    func sendMessageToDB(group: DispatchGroup, text: String, contactID: String)
 }
 
 class ContactStorage: ContactStorageProtocol {
@@ -41,6 +44,7 @@ class ContactStorage: ContactStorageProtocol {
     var storageMyUserKey: String = "myMessenger"
     
     init (){
+        for type in [MessageType.outgoing, MessageType.incomming] { messages[type] = [] }
     }
     
     //MARK: работа с аккаунтом
@@ -168,8 +172,34 @@ class ContactStorage: ContactStorageProtocol {
         else { sql.answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
     }
     
+    //MARK: работа с сообщениями
+    func sendMessage(group: DispatchGroup, telephone: String, text: String){
+        sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { [self] in
+            let responseJSON = sql.responseJSON as? [String:Any]
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            if sql.httpStatus?.statusCode == 200 {
+                sendMessageToDB(group: group, text: text, contactID: responseJSON?["id"] as! String)
+            }
+            else if sql.httpStatus?.statusCode == 404 {
+                sql.answerOnRequest = "Сообщение не отправлено, контакт не зарегистрирован в системе!"
+                group.leave()
+            }
+        }
+    }
+    
+    func sendMessageToDB(group: DispatchGroup, text: String, contactID: String) {
+        sql.sendRequest("messages", ["text":text, "fromUserID": myUser!.id ?? "", "toUserID": contactID], "POST") { [self] in
+            let responseJSON = sql.responseJSON as? [String:Any]
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            if sql.httpStatus?.statusCode == 200 {
+                messages[MessageType.outgoing]?.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: responseJSON?["createdAt"] as! String))
+                group.leave()
+            }
+        }
+    }
+    
     //MARK: вывод на TableViewController элементов
-    func showAlertMessage (_ myTitle: String, _ myController: UITableViewController) {
+    func showAlertMessage (_ myTitle: String, _ myController: UIViewController) {
         let alert = UIAlertController(title: myTitle, message: (sql.answerOnRequest ?? "Неизвестный ответ сервера"), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         myController.present(alert, animated: true, completion: nil)

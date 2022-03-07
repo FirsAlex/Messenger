@@ -17,7 +17,7 @@ protocol MessageProtocol {
     var text: String { get set }
     var delivered: Bool { get set }
     var contactID: String { get set }
-    var createdAt: Date { get set }
+    var createdAt: String { get set }
 }
 
 struct Message: MessageProtocol {
@@ -25,5 +25,5 @@ struct Message: MessageProtocol {
     var text: String
     var delivered: Bool
     var contactID: String
-    var createdAt: Date
+    var createdAt: String
 }

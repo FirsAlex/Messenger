@@ -10,35 +10,36 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="83" id="KGk-i7-Jjw" customClass="MessageFromUserCell" customModule="messenger" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="336" height="83"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="80" id="KGk-i7-Jjw" customClass="MessageFromUserCell" customModule="messenger" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="370" height="80"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="336" height="83"/>
+                <rect key="frame" x="0.0" y="0.0" width="370" height="80"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4N3-MZ-jF7">
-                        <rect key="frame" x="60" y="10" width="266" height="63"/>
+                        <rect key="frame" x="60" y="10" width="300" height="60"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="исходящее сообщение" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="i5P-Gz-h5V">
-                                <rect key="frame" x="8" y="8" width="204" height="47"/>
+                                <rect key="frame" x="8" y="8" width="207" height="44"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LId-0P-dJf">
-                                <rect key="frame" x="243" y="55" width="15" height="0.0"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="symbol" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LId-0P-dJf">
+                                <rect key="frame" x="285" y="45" width="15" height="15"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="15" id="uHZ-T2-Gjh"/>
+                                    <constraint firstAttribute="width" constant="15" id="bhh-uY-3sC"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" systemColor="systemGrayColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="22:21" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hHn-E3-Ukw">
-                                <rect key="frame" x="212" y="40" width="31" height="15"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2022-03-07 21:26:41" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hHn-E3-Ukw">
+                                <rect key="frame" x="215" y="30" width="70" height="30"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="31" id="Agv-Hl-Nge"/>
+                                    <constraint firstAttribute="width" constant="70" id="Pa8-Oi-flj"/>
+                                    <constraint firstAttribute="height" constant="30" id="WlB-VX-Xsg"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" systemColor="systemGrayColor"/>
@@ -47,14 +48,14 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="LId-0P-dJf" firstAttribute="leading" secondItem="hHn-E3-Ukw" secondAttribute="trailing" id="4px-kM-dxl"/>
+                            <constraint firstAttribute="trailing" secondItem="LId-0P-dJf" secondAttribute="trailing" id="3eI-oZ-Dnq"/>
+                            <constraint firstItem="LId-0P-dJf" firstAttribute="leading" secondItem="hHn-E3-Ukw" secondAttribute="trailing" id="B0H-Je-YNq"/>
                             <constraint firstItem="i5P-Gz-h5V" firstAttribute="top" secondItem="4N3-MZ-jF7" secondAttribute="topMargin" id="Mat-UI-mkd"/>
+                            <constraint firstItem="hHn-E3-Ukw" firstAttribute="leading" secondItem="i5P-Gz-h5V" secondAttribute="trailing" id="Q6W-Re-pCy"/>
                             <constraint firstItem="i5P-Gz-h5V" firstAttribute="leading" secondItem="4N3-MZ-jF7" secondAttribute="leadingMargin" id="Qwh-ve-9cX"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="LId-0P-dJf" secondAttribute="bottom" id="Uo0-Bm-xe2"/>
-                            <constraint firstItem="LId-0P-dJf" firstAttribute="trailing" secondItem="4N3-MZ-jF7" secondAttribute="trailingMargin" id="guq-O4-tT6"/>
+                            <constraint firstAttribute="bottom" secondItem="LId-0P-dJf" secondAttribute="bottom" id="hdp-4u-DHL"/>
                             <constraint firstAttribute="bottomMargin" secondItem="i5P-Gz-h5V" secondAttribute="bottom" id="nR2-4I-uw5"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="hHn-E3-Ukw" secondAttribute="bottom" id="qCD-uu-FrJ"/>
-                            <constraint firstItem="hHn-E3-Ukw" firstAttribute="leading" secondItem="i5P-Gz-h5V" secondAttribute="trailing" id="toG-Cx-dBe"/>
+                            <constraint firstAttribute="bottom" secondItem="hHn-E3-Ukw" secondAttribute="bottom" id="nR4-eN-SKL"/>
                         </constraints>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -77,7 +78,7 @@
                 <outlet property="outgoingTime" destination="hHn-E3-Ukw" id="m9n-OH-5LM"/>
                 <outlet property="symbol" destination="LId-0P-dJf" id="Jzr-R4-wfW"/>
             </connections>
-            <point key="canvasLocation" x="127.53623188405798" y="17.745535714285712"/>
+            <point key="canvasLocation" x="149.27536231884059" y="16.741071428571427"/>
         </tableViewCell>
     </objects>
     <resources>

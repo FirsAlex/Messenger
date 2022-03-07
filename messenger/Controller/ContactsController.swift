@@ -129,7 +129,7 @@ class ContactsController: UITableViewController {
     //MARK: обработка выделения строки
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let chatScreen = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ChatController") as! ChatController
-        chatScreen.navigationItem.title = (tableView.cellForRow(at: indexPath) as! ContactsCell).nameContact.text
+        chatScreen.contactIndex = indexPath.row
         // переход к экрану редактирования
         self.navigationController?.pushViewController(chatScreen, animated: true)
     }

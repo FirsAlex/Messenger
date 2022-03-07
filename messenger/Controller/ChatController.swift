@@ -11,8 +11,11 @@ class ChatController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var dataTextField: UITextView!
     @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var constraintTopTable: NSLayoutConstraint!
+    
+    let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared
-    var contactIndex: Int?
+    var contactIndex: Int!
     
     deinit{
         removeForKeyboardNotifications()
@@ -31,6 +34,7 @@ class ChatController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        self.navigationItem.title = contact.contacts[contactIndex].name
         tableView.scrollToBottom()
         print("ChatController - viewWillAppear")
     }
@@ -47,7 +51,18 @@ class ChatController: UIViewController {
     
     // отправка
     @IBAction func send() {
-        print("WORK!!!")
+        groupWaitResponseHttp.enter()
+        contact.sendMessage(group: groupWaitResponseHttp, telephone: contact.contacts[contactIndex].telephone, text: dataTextField.text)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
+            if contact.sql.httpStatus?.statusCode != 200 {
+                contact.showAlertMessage("Отправка сообщения", self)
+            }
+            else {
+                dataTextField.text = ""
+                tableView.reloadData()
+                tableView.scrollToBottom(isAnimated: true)
+            }
+        }
     }
     
     //MARK: обрабатываем нотификации от клавиатуры
@@ -65,10 +80,13 @@ class ChatController: UIViewController {
         let userInfo = notification.userInfo
         let kbFrameSize = (userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         scrollView.contentOffset = CGPoint(x: 0, y: kbFrameSize.height)
+        constraintTopTable.constant = kbFrameSize.height
+        tableView.scrollToBottom(isAnimated: true)
     }
     
     @objc func kbWillHide() {
-        scrollView.contentOffset = CGPoint.zero
+        constraintTopTable.constant = 0
+        self.scrollView.contentOffset = CGPoint.zero
     }
 
 }
@@ -77,26 +95,31 @@ class ChatController: UIViewController {
 extension ChatController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section:Int) -> Int {
-        return 20
+        return (contact.messages[MessageType.outgoing]?.count ?? 0) + (contact.messages[MessageType.incomming]?.count ?? 0)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    var chatCell: UITableViewCell!
+        var resultCell: UITableViewCell!
         
-        if indexPath.row % 2 == 0 {
-            //получение переиспользуемой кастомной ячейки по ее идентификатору
-            chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath)
-            (chatCell as! MessageToUserCell).incommingText.text = "\(indexPath.row) Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
-            (chatCell as! MessageToUserCell).incommingTime.text = "22:20"
+        for (messageType, message) in contact.messages {
+            if (messageType == .outgoing) && (message.count != 0) {
+                let chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
+                chatCell.outgoingText.text = message[indexPath.row].text
+                chatCell.outgoingTime.text = message[indexPath.row].createdAt
+                if message[indexPath.row].delivered {
+                    chatCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
+                }
+                else { chatCell.symbol.text = "\u{2713}" }
+                resultCell = chatCell
+            }
+            else if (messageType == .incomming) && (message.count != 0) {
+                let chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
+                chatCell.incommingText.text = message[indexPath.row].text
+                chatCell.incommingTime.text = message[indexPath.row].createdAt
+                resultCell = chatCell
+            }
         }
-        else {
-            chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath)
-            (chatCell as! MessageFromUserCell).outgoingText.text = "\(indexPath.row) Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
-            (chatCell as! MessageFromUserCell).outgoingTime.text = "22:21"
-            (chatCell as! MessageFromUserCell).symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
-        }
-        
-        return chatCell
+        return resultCell
     }
 }
 
