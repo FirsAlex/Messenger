@@ -11,11 +11,7 @@ class ChatController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var constraintTopTable: NSLayoutConstraint!
-    @IBOutlet weak var dataTextField: UITextView! {
-        didSet {
-            dataTextField.text = (dataTextField.text == "") ? " " : dataTextField.text
-        }
-    }
+    @IBOutlet weak var dataTextField: UITextView!
     
     let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared
@@ -55,9 +51,10 @@ class ChatController: UIViewController {
     
     // отправка
     @IBAction func send(_ sender: UIButton) {
+        guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
         sender.configuration?.showsActivityIndicator = true
-        contact.sendMessage(group: groupWaitResponseHttp, telephone: contact.contacts[contactIndex].telephone, text: dataTextField.text)
+         contact.sendMessage(group: groupWaitResponseHttp, telephone: contact.contacts[contactIndex].telephone, text: dataTextField.text)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
             if contact.sql.httpStatus?.statusCode == 200 {
                 dataTextField.text = ""
