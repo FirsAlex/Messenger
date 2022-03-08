@@ -24,6 +24,7 @@ class ChatsUserController: UITableViewController {
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
                 spinner?.dismiss(animated: true, completion: { contact.showAlertMessage("Загрузка контактов", self)})
+                contact.sql.httpStatus = nil
             }
         }
         print("Chats - loadView")
@@ -98,6 +99,7 @@ class ChatsUserController: UITableViewController {
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
+                contact.sql.httpStatus = nil
             }
         }
         // кнопка отмены

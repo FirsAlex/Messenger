@@ -92,7 +92,7 @@
                                                             <imageReference key="image" image="paperplane.fill" catalog="system" symbolScale="large"/>
                                                         </buttonConfiguration>
                                                         <connections>
-                                                            <action selector="send" destination="Zrl-6j-3hJ" eventType="touchUpInside" id="P92-R7-ZbW"/>
+                                                            <action selector="send:" destination="Zrl-6j-3hJ" eventType="touchUpInside" id="cjT-G4-PEl"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>

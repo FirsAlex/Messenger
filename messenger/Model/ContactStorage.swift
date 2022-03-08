@@ -193,6 +193,7 @@ class ContactStorage: ContactStorageProtocol {
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             if sql.httpStatus?.statusCode == 200 {
                 messages[MessageType.outgoing]?.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: responseJSON?["createdAt"] as! String))
+                sql.answerOnRequest = "Сообщение отправлено!"
                 group.leave()
             }
         }

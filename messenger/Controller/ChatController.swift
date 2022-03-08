@@ -50,18 +50,21 @@ class ChatController: UIViewController {
    }
     
     // отправка
-    @IBAction func send() {
+    @IBAction func send(_ sender: UIButton) {
         groupWaitResponseHttp.enter()
+        sender.configuration?.showsActivityIndicator = true
         contact.sendMessage(group: groupWaitResponseHttp, telephone: contact.contacts[contactIndex].telephone, text: dataTextField.text)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
-            if contact.sql.httpStatus?.statusCode != 200 {
-                contact.showAlertMessage("Отправка сообщения", self)
-            }
-            else {
+            if contact.sql.httpStatus?.statusCode == 200 {
                 dataTextField.text = ""
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
+                contact.sql.httpStatus = nil
             }
+            else {
+                contact.showAlertMessage("Отправка сообщения", self)
+            }
+            sender.configuration?.showsActivityIndicator = false
         }
     }
     
@@ -79,14 +82,12 @@ class ChatController: UIViewController {
     @objc func kbWillShow(_ notification: Notification) {
         let userInfo = notification.userInfo
         let kbFrameSize = (userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-        tableView.reloadData()  //???
         constraintTopTable.constant = kbFrameSize.height
         scrollView.contentOffset = CGPoint(x: 0, y: kbFrameSize.height)
         tableView.scrollToBottom()
     }
     
     @objc func kbWillHide() {
-        tableView.reloadData() //???
         scrollView.contentOffset = CGPoint.zero
         constraintTopTable.constant = 0
     }

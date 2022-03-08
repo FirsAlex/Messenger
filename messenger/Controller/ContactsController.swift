@@ -93,6 +93,7 @@ class ContactsController: UITableViewController {
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
                 tableView.reloadData()
+                contact.sql.httpStatus = nil
             }
         }
         // кнопка отмены
@@ -115,6 +116,7 @@ class ContactsController: UITableViewController {
                 // удаляем строку, соответствующую задаче
                 spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", self)})
                 tableView.reloadData()
+                contact.sql.httpStatus = nil
             }
         }
         // действие изменить
