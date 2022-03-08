@@ -105,7 +105,6 @@ extension ChatController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var resultCell: UITableViewCell!
-        
         for (messageType, message) in contact.messages {
             if (messageType == .outgoing) && (message.count != 0) {
                 let chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell

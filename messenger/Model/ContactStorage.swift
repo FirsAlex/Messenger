@@ -23,6 +23,7 @@ protocol ContactStorageProtocol {
     
     func sendMessage(group: DispatchGroup, telephone: String, text: String)
     func sendMessageToDB(group: DispatchGroup, text: String, contactID: String)
+    func isodateFromString(_ isoString: String) -> String
 }
 
 class ContactStorage: ContactStorageProtocol {
@@ -189,14 +190,24 @@ class ContactStorage: ContactStorageProtocol {
     
     func sendMessageToDB(group: DispatchGroup, text: String, contactID: String) {
         sql.sendRequest("messages", ["text":text, "fromUserID": myUser!.id ?? "", "toUserID": contactID], "POST") { [self] in
-            let responseJSON = sql.responseJSON as? [String:Any]
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
-                messages[.outgoing]?.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: responseJSON?["createdAt"] as! String))
+                messages[.outgoing]?.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String)))
                 sql.answerOnRequest = "Сообщение отправлено!"
                 group.leave()
             }
         }
+    }
+    
+    func isodateFromString(_ isoString: String) -> String {
+        let stringToDateFormatter = ISO8601DateFormatter()
+        stringToDateFormatter.timeZone = TimeZone(secondsFromGMT: TimeZone.current.secondsFromGMT())
+        stringToDateFormatter.formatOptions = [.withFullDate, .withFullTime, .withDashSeparatorInDate]
+        guard let date = stringToDateFormatter.date(from: isoString) else { return "" }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy HH:mm:ss"
+        return dateFormatter.string(from: date)
     }
     
     //MARK: вывод на TableViewController элементов
