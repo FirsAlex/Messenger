@@ -100,7 +100,7 @@ class ChatController: UIViewController {
 extension ChatController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section:Int) -> Int {
-        return (contact.messages[MessageType.outgoing]?.count ?? 0) + (contact.messages[MessageType.incomming]?.count ?? 0)
+        return (contact.messages[.outgoing]?.count ?? 0) + (contact.messages[.incomming]?.count ?? 0)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
