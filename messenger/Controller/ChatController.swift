@@ -9,9 +9,13 @@ import UIKit
 
 class ChatController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var dataTextField: UITextView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var constraintTopTable: NSLayoutConstraint!
+    @IBOutlet weak var dataTextField: UITextView! {
+        didSet {
+            dataTextField.text = (dataTextField.text == "") ? " " : dataTextField.text
+        }
+    }
     
     let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared

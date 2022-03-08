@@ -61,7 +61,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="808"/>
                                         <subviews>
                                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bVs-cF-emQ">
-                                                <rect key="frame" x="0.0" y="0.0" width="414" height="708"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="685"/>
                                                 <color key="backgroundColor" systemColor="systemGray6Color"/>
                                                 <connections>
                                                     <outlet property="dataSource" destination="Zrl-6j-3hJ" id="ZiF-tr-B5Z"/>
@@ -69,7 +69,7 @@
                                                 </connections>
                                             </tableView>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QWS-qm-AB6">
-                                                <rect key="frame" x="10" y="718" width="394" height="80"/>
+                                                <rect key="frame" x="10" y="695" width="394" height="80"/>
                                                 <subviews>
                                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" horizontalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="NCc-z8-7ZB">
                                                         <rect key="frame" x="0.0" y="0.0" width="347.5" height="80"/>
@@ -108,7 +108,7 @@
                                             <constraint firstAttribute="trailing" secondItem="QWS-qm-AB6" secondAttribute="trailing" constant="10" id="Mwh-QV-21b"/>
                                             <constraint firstItem="QWS-qm-AB6" firstAttribute="leading" secondItem="v4v-Qo-cGy" secondAttribute="leading" constant="10" id="bg3-un-uMx"/>
                                             <constraint firstAttribute="trailing" secondItem="bVs-cF-emQ" secondAttribute="trailing" id="rMz-om-o8B"/>
-                                            <constraint firstAttribute="bottom" secondItem="QWS-qm-AB6" secondAttribute="bottom" constant="10" id="vrB-R2-jR0"/>
+                                            <constraint firstAttribute="bottom" secondItem="QWS-qm-AB6" secondAttribute="bottom" constant="33" id="vrB-R2-jR0"/>
                                         </constraints>
                                     </view>
                                 </subviews>
