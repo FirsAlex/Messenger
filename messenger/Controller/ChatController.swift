@@ -60,12 +60,12 @@ class ChatController: UIViewController {
                 dataTextField.text = ""
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
-                contact.sql.httpStatus = nil
             }
             else {
                 contact.showAlertMessage("Отправка сообщения", self)
             }
             sender.configuration?.showsActivityIndicator = false
+            contact.sql.httpStatus = nil
         }
     }
     
