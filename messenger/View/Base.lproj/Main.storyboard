@@ -60,8 +60,8 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v4v-Qo-cGy">
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="774"/>
                                         <subviews>
-                                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bVs-cF-emQ">
-                                                <rect key="frame" x="0.0" y="0.0" width="414" height="674"/>
+                                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bVs-cF-emQ">
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="684"/>
                                                 <color key="backgroundColor" systemColor="systemGray6Color"/>
                                                 <connections>
                                                     <outlet property="dataSource" destination="Zrl-6j-3hJ" id="ZiF-tr-B5Z"/>
@@ -69,10 +69,10 @@
                                                 </connections>
                                             </tableView>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QWS-qm-AB6">
-                                                <rect key="frame" x="10" y="684" width="404" height="80"/>
+                                                <rect key="frame" x="5" y="689" width="409" height="80"/>
                                                 <subviews>
                                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" horizontalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="NCc-z8-7ZB">
-                                                        <rect key="frame" x="0.0" y="0.0" width="357.5" height="80"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="362.5" height="80"/>
                                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -86,7 +86,7 @@
                                                         </userDefinedRuntimeAttributes>
                                                     </textView>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H98-9o-fZ7">
-                                                        <rect key="frame" x="357.5" y="0.0" width="46.5" height="80"/>
+                                                        <rect key="frame" x="362.5" y="0.0" width="46.5" height="80"/>
                                                         <state key="normal" title="Button"/>
                                                         <buttonConfiguration key="configuration" style="plain">
                                                             <imageReference key="image" image="paperplane.fill" catalog="system" symbolScale="large"/>
@@ -102,13 +102,13 @@
                                             </stackView>
                                         </subviews>
                                         <constraints>
-                                            <constraint firstItem="QWS-qm-AB6" firstAttribute="top" secondItem="bVs-cF-emQ" secondAttribute="bottom" constant="10" id="BUP-f8-S0b"/>
+                                            <constraint firstItem="QWS-qm-AB6" firstAttribute="top" secondItem="bVs-cF-emQ" secondAttribute="bottom" constant="5" id="BUP-f8-S0b"/>
                                             <constraint firstItem="bVs-cF-emQ" firstAttribute="top" secondItem="v4v-Qo-cGy" secondAttribute="top" id="DhH-Ff-fsW"/>
                                             <constraint firstItem="bVs-cF-emQ" firstAttribute="leading" secondItem="v4v-Qo-cGy" secondAttribute="leading" id="FEf-VY-t0W"/>
                                             <constraint firstAttribute="trailing" secondItem="QWS-qm-AB6" secondAttribute="trailing" id="Mwh-QV-21b"/>
-                                            <constraint firstItem="QWS-qm-AB6" firstAttribute="leading" secondItem="v4v-Qo-cGy" secondAttribute="leading" constant="10" id="bg3-un-uMx"/>
+                                            <constraint firstItem="QWS-qm-AB6" firstAttribute="leading" secondItem="v4v-Qo-cGy" secondAttribute="leading" constant="5" id="bg3-un-uMx"/>
                                             <constraint firstAttribute="trailing" secondItem="bVs-cF-emQ" secondAttribute="trailing" id="rMz-om-o8B"/>
-                                            <constraint firstAttribute="bottom" secondItem="QWS-qm-AB6" secondAttribute="bottom" constant="10" id="vrB-R2-jR0"/>
+                                            <constraint firstAttribute="bottom" secondItem="QWS-qm-AB6" secondAttribute="bottom" constant="5" id="vrB-R2-jR0"/>
                                         </constraints>
                                     </view>
                                 </subviews>

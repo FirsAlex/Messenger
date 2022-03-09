@@ -84,16 +84,14 @@ class ChatController: UIViewController {
         let userInfo = notification.userInfo
         let kbFrameSize = (userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         scrollView.contentOffset = CGPoint(x: 0, y: kbFrameSize.height)
-        tableView.scrollToBottom()
         constraintTopTable.constant = kbFrameSize.height
+        tableView.scrollToBottom()
     }
     
     @objc func kbWillHide() {
         scrollView.contentOffset = CGPoint.zero
-        tableView.scrollToBottom()
         constraintTopTable.constant = 0
     }
-
 }
 
 // MARK: - источник данных ChatController
