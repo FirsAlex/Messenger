@@ -16,10 +16,14 @@ class ChatController: UIViewController {
     let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared
     var contactIndex: Int!
+    var httpTimer: Timer?
     
     deinit{
-        removeForKeyboardNotifications()
         print("ChatController - deinit")
+    }
+    override func loadView() {
+        super.loadView()
+        print("ChatController - loadView")
     }
     
     override func viewDidLoad() {
@@ -30,18 +34,29 @@ class ChatController: UIViewController {
         let outgoingCellNib = UINib(nibName: "MessageFromUserCell", bundle: nil)
         tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
+        httpTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [self] timer in
+            loadMessages()
+        }
+        httpTimer!.fire()
         print("ChatController - viewDidLoad")
     }
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationItem.title = contact.contacts[contactIndex].name
-        tableView.scrollToBottom()
         print("ChatController - viewWillAppear")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("ChatController - viewDidAppear")
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        removeForKeyboardNotifications()
+        httpTimer?.invalidate()
+        httpTimer = nil
+        print("ChatController - viewWillDisappear")
     }
     
     // перейти к корневой сцене
@@ -54,17 +69,27 @@ class ChatController: UIViewController {
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
         sender.configuration?.showsActivityIndicator = true
-         contact.sendMessage(group: groupWaitResponseHttp, telephone: contact.contacts[contactIndex].telephone, text: dataTextField.text)
+        contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
             if contact.sql.httpStatus?.statusCode == 200 {
                 dataTextField.text = ""
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
             }
-            else {
-                contact.showAlertMessage("Отправка сообщения", self)
-            }
+            else { contact.showAlertMessage("Отправка сообщения", self) }
             sender.configuration?.showsActivityIndicator = false
+            contact.sql.httpStatus = nil
+        }
+    }
+
+    func loadMessages() {
+        groupWaitResponseHttp.enter()
+        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex)
+        groupWaitResponseHttp.notify(qos: .background, queue: .main) {[self] in
+            if contact.sql.httpStatus?.statusCode == 200 {
+                tableView.reloadData()
+                tableView.scrollToBottom()
+            }
             contact.sql.httpStatus = nil
         }
     }
@@ -98,31 +123,34 @@ class ChatController: UIViewController {
 extension ChatController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section:Int) -> Int {
-        return (contact.messages[.outgoing]?.count ?? 0) + (contact.messages[.incomming]?.count ?? 0)
+        return contact.messages.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var resultCell: UITableViewCell!
-        for (messageType, message) in contact.messages {
-            if (messageType == .outgoing) && (message.count != 0) {
-                let chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
-                chatCell.outgoingText.text = message[indexPath.row].text
-                chatCell.outgoingTime.text = message[indexPath.row].createdAt
-                if message[indexPath.row].delivered {
-                    chatCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
+        let outgoingCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
+        let incommingCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
+        
+        guard contact.messages.count != 0 else { return outgoingCell}
+        let message = contact.messages[indexPath.row]
+        if (message.type == .outgoing) {
+            outgoingCell.outgoingText.text = message.text
+            outgoingCell.outgoingTime.text = message.createdAt
+                if message.delivered {
+                    outgoingCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
                 }
-                else { chatCell.symbol.text = "\u{2713}" }
-                resultCell = chatCell
-            }
-            else if (messageType == .incomming) && (message.count != 0) {
-                let chatCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
-                chatCell.incommingText.text = message[indexPath.row].text
-                chatCell.incommingTime.text = message[indexPath.row].createdAt
-                resultCell = chatCell
-            }
+                else { outgoingCell.symbol.text = "\u{2713}" }
+            resultCell = outgoingCell
+        }
+        else if message.type == .incomming {
+            
+            incommingCell.incommingText.text = message.text
+            incommingCell.incommingTime.text = message.createdAt
+            resultCell = incommingCell
         }
         return resultCell
     }
+    
 }
 
 // MARK: - делегирование ChatController

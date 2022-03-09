@@ -21,30 +21,30 @@
                         <rect key="frame" x="10" y="10" width="300" height="60"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="входящее сообщение" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XkM-Ke-rMm">
-                                <rect key="frame" x="8" y="8" width="227" height="44"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <rect key="frame" x="8" y="8" width="209" height="44"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2022-03-07 21:26:41" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wnL-jf-wg0">
-                                <rect key="frame" x="235" y="30" width="65" height="30"/>
+                                <rect key="frame" x="217" y="30" width="75" height="30"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="65" id="1Om-fo-eP0"/>
-                                    <constraint firstAttribute="height" constant="30" id="I13-qM-DF6"/>
+                                    <constraint firstAttribute="width" constant="75" id="8Jv-Hc-g9H"/>
+                                    <constraint firstAttribute="height" constant="30" id="mA7-7x-cQ9"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" systemColor="systemGrayColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="wnL-jf-wg0" firstAttribute="leading" secondItem="XkM-Ke-rMm" secondAttribute="trailing" id="A88-v2-r6n"/>
                             <constraint firstItem="XkM-Ke-rMm" firstAttribute="top" secondItem="6h9-We-CoU" secondAttribute="topMargin" id="LM9-rC-mcr"/>
-                            <constraint firstAttribute="trailing" secondItem="wnL-jf-wg0" secondAttribute="trailing" id="e8T-Vp-LWW"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="wnL-jf-wg0" secondAttribute="trailing" id="Qa5-gX-BmR"/>
                             <constraint firstItem="XkM-Ke-rMm" firstAttribute="leading" secondItem="6h9-We-CoU" secondAttribute="leadingMargin" id="fBN-Mf-G9n"/>
-                            <constraint firstAttribute="bottom" secondItem="wnL-jf-wg0" secondAttribute="bottom" id="iaB-UW-lQN"/>
+                            <constraint firstAttribute="bottom" secondItem="wnL-jf-wg0" secondAttribute="bottom" id="vbF-Ye-gNH"/>
                             <constraint firstAttribute="bottomMargin" secondItem="XkM-Ke-rMm" secondAttribute="bottom" id="yJe-oj-WMl"/>
+                            <constraint firstItem="wnL-jf-wg0" firstAttribute="leading" secondItem="XkM-Ke-rMm" secondAttribute="trailing" id="yWc-h3-gm3"/>
                         </constraints>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
