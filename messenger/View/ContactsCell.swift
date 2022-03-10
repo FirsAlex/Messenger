@@ -8,8 +8,8 @@
 import UIKit
 
 class ContactsCell: UITableViewCell {
-    @IBOutlet var nameContact: UILabel!
-    @IBOutlet var telephoneContact: UILabel!
+    @IBOutlet weak var nameContact: UILabel!
+    @IBOutlet weak var telephoneContact: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()

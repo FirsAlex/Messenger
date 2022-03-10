@@ -36,6 +36,7 @@ class ChatController: UIViewController {
         registerForKeyboardNotifications()
         
         httpTimer.start { self.loadMessages() }
+        httpTimer.timer?.fire()
         print("ChatController - viewDidLoad")
     }
     
@@ -85,7 +86,7 @@ class ChatController: UIViewController {
         contact.messages = []
         groupWaitResponseHttp.enter()
         contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex)
-        groupWaitResponseHttp.notify(qos: .background, queue: .main) {[self] in
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
             if (contact.sql.httpStatus?.statusCode == 200) && (contact.messages.count != 0) {
                 tableView.reloadData()
                 tableView.scrollToBottom()
@@ -121,6 +122,10 @@ class ChatController: UIViewController {
 
 // MARK: - источник данных ChatController
 extension ChatController: UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        // #warning Incomplete implementation, return the number of sections
+        return 1
+    }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section:Int) -> Int {
         return contact.messages.count
@@ -128,12 +133,10 @@ extension ChatController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var resultCell: UITableViewCell!
-        let outgoingCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
-        let incommingCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
-        guard contact.messages.count != 0 else { return outgoingCell}
         let message = contact.messages[indexPath.row]
         
         if (message.type == .outgoing) {
+            let outgoingCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
             outgoingCell.outgoingText.text = message.text
             outgoingCell.outgoingTime.text = message.createdAt
                 if message.delivered {
@@ -143,6 +146,7 @@ extension ChatController: UITableViewDataSource {
             resultCell = outgoingCell
         }
         else if message.type == .incomming {
+            let incommingCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
             incommingCell.incommingText.text = message.text
             incommingCell.incommingTime.text = message.createdAt
             resultCell = incommingCell

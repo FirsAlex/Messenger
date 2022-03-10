@@ -8,10 +8,10 @@
 import UIKit
 
 class ChatsCell: UITableViewCell {
-    @IBOutlet var nameContact: UILabel!
-    @IBOutlet var lastMessageTime: UILabel!
-    @IBOutlet var symbol: UILabel!
-    @IBOutlet var lastMessage: UILabel!
+    @IBOutlet weak var nameContact: UILabel!
+    @IBOutlet weak var lastMessageTime: UILabel!
+    @IBOutlet weak var symbol: UILabel!
+    @IBOutlet weak var lastMessage: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()

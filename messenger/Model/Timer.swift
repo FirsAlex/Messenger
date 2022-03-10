@@ -14,7 +14,6 @@ class MyTimer {
         timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true){ timer in
             completion()
         }
-        timer?.fire()
     }
     
     func stop() {
@@ -22,5 +21,9 @@ class MyTimer {
         timer = nil
     }
     
-    deinit { timer?.invalidate() }
+    deinit {
+        timer?.invalidate()
+        timer = nil
+        print("deinit MyTimer")
+    }
 }
