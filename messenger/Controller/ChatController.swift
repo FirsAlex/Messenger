@@ -68,6 +68,7 @@ class ChatController: UIViewController {
     @IBAction func send(_ sender: UIButton) {
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
+        httpTimer?.invalidate()
         sender.configuration?.showsActivityIndicator = true
         contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
@@ -79,6 +80,7 @@ class ChatController: UIViewController {
             else { contact.showAlertMessage("Отправка сообщения", self) }
             sender.configuration?.showsActivityIndicator = false
             contact.sql.httpStatus = nil
+            httpTimer?.fire()
         }
     }
 
@@ -130,9 +132,9 @@ extension ChatController: UITableViewDataSource {
         var resultCell: UITableViewCell!
         let outgoingCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
         let incommingCell = tableView.dequeueReusableCell(withIdentifier: "MessageToUserCell", for: indexPath) as! MessageToUserCell
-        
         guard contact.messages.count != 0 else { return outgoingCell}
         let message = contact.messages[indexPath.row]
+        
         if (message.type == .outgoing) {
             outgoingCell.outgoingText.text = message.text
             outgoingCell.outgoingTime.text = message.createdAt
@@ -143,11 +145,11 @@ extension ChatController: UITableViewDataSource {
             resultCell = outgoingCell
         }
         else if message.type == .incomming {
-            
             incommingCell.incommingText.text = message.text
             incommingCell.incommingTime.text = message.createdAt
             resultCell = incommingCell
         }
+        
         return resultCell
     }
     

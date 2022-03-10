@@ -33,7 +33,7 @@ class ContactStorage: ContactStorageProtocol {
     let sql = SqlRequest()
     
     var contacts: [UserProtocol] = []
-    var messages: [Message] = []
+    var messages: [MessageProtocol] = []
     
     var myUser: UserProtocol? {
         didSet {
