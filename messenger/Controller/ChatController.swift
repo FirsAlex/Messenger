@@ -82,10 +82,11 @@ class ChatController: UIViewController {
     }
 
     func loadMessages() {
+        contact.messages = []
         groupWaitResponseHttp.enter()
         contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex)
         groupWaitResponseHttp.notify(qos: .background, queue: .main) {[self] in
-            if contact.sql.httpStatus?.statusCode == 200 {
+            if (contact.sql.httpStatus?.statusCode == 200) && (contact.messages.count != 0) {
                 tableView.reloadData()
                 tableView.scrollToBottom()
             }

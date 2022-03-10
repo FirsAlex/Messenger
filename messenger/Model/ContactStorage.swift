@@ -176,7 +176,6 @@ class ContactStorage: ContactStorageProtocol {
     
     //MARK: работа с сообщениями
     func getMessage(group: DispatchGroup, contactID: Int) {
-        messages = []
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [String:Any]
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
