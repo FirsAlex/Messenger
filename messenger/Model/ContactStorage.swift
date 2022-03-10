@@ -21,8 +21,8 @@ protocol ContactStorageProtocol {
     func postMyUserToDB(group: DispatchGroup, telephone: String, name: String)
     func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
     
-    func getMessage(group: DispatchGroup, contactID: Int)
-    func getMessageFromDB(group: DispatchGroup, contactID: String)
+    func getMessage(group: DispatchGroup, contactID: Int, delivered: String)
+    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String)
     func updateMessageFromDB(group: DispatchGroup, contactID: String)
     func sendMessage(group: DispatchGroup, contactID: Int, text: String)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String)
@@ -176,13 +176,13 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     //MARK: работа с сообщениями
-    func getMessage(group: DispatchGroup, contactID: Int) {
+    func getMessage(group: DispatchGroup, contactID: Int, delivered: String) {
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [String:Any]
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             if sql.httpStatus?.statusCode == 200 {
                 contacts[contactID].userID = responseJSON?["id"] as? String
-                getMessageFromDB(group: group, contactID: responseJSON?["id"] as! String)
+                getMessageFromDB(group: group, contactID: responseJSON?["id"] as! String, delivered: delivered)
             }
             else if sql.httpStatus?.statusCode == 404 {
                 sql.answerOnRequest = "Контакт не зарегистрирован в системе!"
@@ -192,8 +192,8 @@ class ContactStorage: ContactStorageProtocol {
         
     }
     
-    func getMessageFromDB(group: DispatchGroup, contactID: String) {
-        sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "GET") { [self] in
+    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String) {
+        sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=" + delivered, [:], "GET") { [self] in
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
@@ -205,8 +205,10 @@ class ContactStorage: ContactStorageProtocol {
                                             delivered: message["delivered"] as! Bool, contactID: contact ?? "",
                             createdAt: isodateFromString(message["createdAt"] as! String), type: type))
                 }
-                sql.answerOnRequest = "Сообщения получены!"
-                updateMessageFromDB(group: group, contactID: contactID)
+                if responseJSON.count != 0 {
+                    sql.answerOnRequest = "Сообщения получены!"
+                    updateMessageFromDB(group: group, contactID: contactID)
+                }
             }
         }
     }

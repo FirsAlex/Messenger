@@ -34,8 +34,8 @@ class ChatController: UIViewController {
         let outgoingCellNib = UINib(nibName: "MessageFromUserCell", bundle: nil)
         tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
-        httpTimer.start { self.loadMessages() }
-        httpTimer.timer?.fire()
+        loadMessages(delivered: "all")
+        httpTimer.start { self.loadMessages(delivered: "false") }
         print("ChatController - viewDidLoad")
     }
     
@@ -75,18 +75,18 @@ class ChatController: UIViewController {
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
             }
-            else { contact.showAlertMessage("Отправка сообщения", self) }
+            //else { contact.showAlertMessage("Отправка сообщения", self) }
             sender.configuration?.showsActivityIndicator = false
             contact.sql.httpStatus = nil
-            httpTimer.start { self.loadMessages() }
+            httpTimer.start { self.loadMessages(delivered: "false") }
         }
     }
 
-    func loadMessages() {
+    func loadMessages(delivered: String = "all") {
         groupWaitResponseHttp.enter()
-        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex)
+        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
-            if (contact.sql.httpStatus?.statusCode == 200) && (contact.messages.count != 0) {
+            if (contact.sql.httpStatus?.statusCode == 200) {
                 tableView.reloadData()
                 tableView.scrollToBottom()
             }
@@ -133,7 +133,6 @@ extension ChatController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var resultCell: UITableViewCell!
         let message = contact.messages[indexPath.row]
-        
         if (message.type == .outgoing) {
             let outgoingCell = tableView.dequeueReusableCell(withIdentifier: "MessageFromUserCell", for: indexPath) as! MessageFromUserCell
             outgoingCell.outgoingText.text = message.text
