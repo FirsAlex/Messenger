@@ -8,17 +8,19 @@
 import Foundation
 
 class MyTimer {
-    var timer: Timer?
+    weak var timer: Timer?
     
-    func start(_ completion: @escaping() -> Void) -> Void {
-        self.timer =
-           Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true){_ in
-               completion()
-           }
-        self.timer!.fire()
+    func start(_ completion: @escaping() -> Void) {
+        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true){ timer in
+            completion()
+        }
+        timer?.fire()
     }
-    func stop() -> Void {
-        self.timer?.invalidate()
-        self.timer = nil
+    
+    func stop() {
+        timer?.invalidate()
+        timer = nil
     }
+    
+    deinit { timer?.invalidate() }
 }

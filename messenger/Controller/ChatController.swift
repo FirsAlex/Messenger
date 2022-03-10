@@ -16,7 +16,7 @@ class ChatController: UIViewController {
     let groupWaitResponseHttp = DispatchGroup()
     var contact = ContactStorage.shared
     var contactIndex: Int!
-    var httpTimer: MyTimer?
+    var httpTimer = MyTimer()
     
     deinit{
         print("ChatController - deinit")
@@ -34,9 +34,8 @@ class ChatController: UIViewController {
         let outgoingCellNib = UINib(nibName: "MessageFromUserCell", bundle: nil)
         tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
-        httpTimer?.start {
-            self.loadMessages()
-        }
+        
+        httpTimer.start { self.loadMessages() }
         print("ChatController - viewDidLoad")
     }
     
@@ -53,7 +52,7 @@ class ChatController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         removeForKeyboardNotifications()
-        httpTimer?.stop()
+        httpTimer.stop()
         print("ChatController - viewWillDisappear")
     }
     
@@ -66,7 +65,7 @@ class ChatController: UIViewController {
     @IBAction func send(_ sender: UIButton) {
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
-        httpTimer?.stop()
+        httpTimer.stop()
         sender.configuration?.showsActivityIndicator = true
         contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
@@ -78,7 +77,7 @@ class ChatController: UIViewController {
             else { contact.showAlertMessage("Отправка сообщения", self) }
             sender.configuration?.showsActivityIndicator = false
             contact.sql.httpStatus = nil
-            httpTimer?.start { self.loadMessages() }
+            httpTimer.start { self.loadMessages() }
         }
     }
 
