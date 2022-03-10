@@ -23,6 +23,7 @@ protocol ContactStorageProtocol {
     
     func getMessage(group: DispatchGroup, contactID: Int)
     func getMessageFromDB(group: DispatchGroup, contactID: String)
+    func updateMessageFromDB(group: DispatchGroup, contactID: String)
     func sendMessage(group: DispatchGroup, contactID: Int, text: String)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String)
     func isodateFromString(_ isoString: String) -> String
@@ -205,9 +206,19 @@ class ContactStorage: ContactStorageProtocol {
                             createdAt: isodateFromString(message["createdAt"] as! String), type: type))
                 }
                 sql.answerOnRequest = "Сообщения получены!"
-                group.leave()
+                updateMessageFromDB(group: group, contactID: contactID)
             }
         }
+    }
+    
+    func updateMessageFromDB(group: DispatchGroup, contactID: String) {
+      sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            if sql.httpStatus?.statusCode == 200 {
+                sql.answerOnRequest = "Сообщения обновлены!"
+                group.leave()
+            }
+      }
     }
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String){

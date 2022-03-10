@@ -34,7 +34,6 @@ class ChatController: UIViewController {
         let outgoingCellNib = UINib(nibName: "MessageFromUserCell", bundle: nil)
         tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
-        
         httpTimer.start { self.loadMessages() }
         httpTimer.timer?.fire()
         print("ChatController - viewDidLoad")
@@ -54,6 +53,7 @@ class ChatController: UIViewController {
         super.viewWillDisappear(animated)
         removeForKeyboardNotifications()
         httpTimer.stop()
+        contact.messages = []
         print("ChatController - viewWillDisappear")
     }
     
@@ -83,7 +83,6 @@ class ChatController: UIViewController {
     }
 
     func loadMessages() {
-        contact.messages = []
         groupWaitResponseHttp.enter()
         contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {[self] in
