@@ -95,6 +95,7 @@ class ChatController: UIViewController {
             if checkMessage {
                 tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
+                else if delivered == "false" { tableView.scrollToBottom(isAnimated: true) }
                 checkMessage = false
             }
             contact.sql.httpStatus = nil

@@ -23,8 +23,12 @@ class ChatsUserController: UITableViewController {
             groupWaitResponseHttp.enter()
             contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-                spinner?.dismiss(animated: true, completion: { contact.showAlertMessage("Загрузка контактов", self)})
-                contact.sql.httpStatus = nil
+                spinner?.dismiss(animated: true){
+                    if contact.sql.httpStatus?.statusCode != 200 {
+                        contact.showAlertMessage("Загрузка контактов", self)
+                    }
+                    contact.sql.httpStatus = nil
+                }
             }
         }
         print("Chats - loadView")
