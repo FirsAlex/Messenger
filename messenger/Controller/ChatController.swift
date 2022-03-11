@@ -94,7 +94,6 @@ class ChatController: UIViewController {
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
             guard contact.sql.httpStatus?.statusCode == 200 else {
-                contact.sql.httpStatus = nil
                 contact.showAlertMessage("Ошибка связи с БД", self)
                 navigationController?.popToRootViewController(animated: true)
                 return
