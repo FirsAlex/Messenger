@@ -92,6 +92,10 @@ class ChatController: UIViewController {
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+            guard contact.sql.httpStatus?.statusCode == 200 else {
+                navigationController?.popViewController(animated: true)
+                return
+            }
             if checkMessage {
                 tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }

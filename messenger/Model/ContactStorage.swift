@@ -180,6 +180,7 @@ class ContactStorage: ContactStorageProtocol {
     //MARK: работа с сообщениями
     func getMessage(group: DispatchGroup, contactID: Int, delivered: String,_ completion: @escaping () -> Void) {
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
                 getMessageFromDB(group: group, contactID: responseJSON?["id"] as! String, delivered: delivered, completion)
@@ -194,6 +195,7 @@ class ContactStorage: ContactStorageProtocol {
     
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void) {
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=" + delivered, [:], "GET") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
                 for message in responseJSON {
@@ -223,6 +225,7 @@ class ContactStorage: ContactStorageProtocol {
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void){
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
                 sendMessageToDB(group: group, contactID: responseJSON?["id"] as! String, text: text, completion)
@@ -236,6 +239,7 @@ class ContactStorage: ContactStorageProtocol {
     
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void) {
         sql.sendRequest("messages", ["text":text, "fromUserID": myUser!.id ?? "", "toUserID": contactID], "POST") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
                 messages.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: .outgoing))
