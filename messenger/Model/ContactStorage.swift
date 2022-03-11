@@ -21,12 +21,12 @@ protocol ContactStorageProtocol {
     func postMyUserToDB(group: DispatchGroup, telephone: String, name: String)
     func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String)
     
-    func getMessage(contactID: Int, delivered: String, _ completion: @escaping () -> Void)
-    func getMessageFromDB(contactID: String, delivered: String, _ completion: @escaping () -> Void)
+    func getMessage(group: DispatchGroup, contactID: Int, delivered: String, _ completion: @escaping () -> Void)
+    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void)
     func updateMessageFromDB(contactID: String)
     
-    func sendMessage(contactID: Int, text: String, _ completion: @escaping () -> Void)
-    func sendMessageToDB(contactID: String, text: String, _ completion: @escaping () -> Void)
+    func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void)
+    func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void)
     
     func isodateFromString(_ isoString: String) -> String
 }
@@ -178,20 +178,21 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     //MARK: работа с сообщениями
-    func getMessage(contactID: Int, delivered: String,_ completion: @escaping () -> Void) {
+    func getMessage(group: DispatchGroup, contactID: Int, delivered: String,_ completion: @escaping () -> Void) {
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
-                getMessageFromDB(contactID: responseJSON?["id"] as! String, delivered: delivered, completion)
+                getMessageFromDB(group: group, contactID: responseJSON?["id"] as! String, delivered: delivered, completion)
             }
             else if sql.httpStatus?.statusCode == 404 {
                 sql.answerOnRequest = "Контакт не зарегистрирован в системе!"
+                group.leave()
             }
         }
         
     }
     
-    func getMessageFromDB(contactID: String, delivered: String, _ completion: @escaping () -> Void) {
+    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void) {
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=" + delivered, [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
@@ -202,11 +203,12 @@ class ContactStorage: ContactStorageProtocol {
                                             delivered: message["delivered"] as! Bool, contactID: contactID,
                             createdAt: isodateFromString(message["createdAt"] as! String), type: type))
                     sql.answerOnRequest = "Сообщения получены!"
-                    completion()
                 }
                 if responseJSON.count != 0 {
+                    completion()
                     updateMessageFromDB(contactID: contactID)
                 }
+                group.leave()
             }
         }
     }
@@ -219,25 +221,27 @@ class ContactStorage: ContactStorageProtocol {
       }
     }
     
-    func sendMessage(contactID: Int, text: String, _ completion: @escaping () -> Void){
+    func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void){
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
-                sendMessageToDB(contactID: responseJSON?["id"] as! String, text: text, completion)
+                sendMessageToDB(group: group, contactID: responseJSON?["id"] as! String, text: text, completion)
             }
             else if sql.httpStatus?.statusCode == 404 {
                 sql.answerOnRequest = "Контакт не зарегистрирован в системе!"
+                group.leave()
             }
         }
     }
     
-    func sendMessageToDB(contactID: String, text: String, _ completion: @escaping () -> Void) {
+    func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void) {
         sql.sendRequest("messages", ["text":text, "fromUserID": myUser!.id ?? "", "toUserID": contactID], "POST") { [self] in
             let responseJSON = sql.responseJSON as? [String:Any]
             if sql.httpStatus?.statusCode == 200 {
                 messages.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: .outgoing))
                 sql.answerOnRequest = "Сообщение отправлено!"
                 completion()
+                group.leave()
             }
         }
     }

@@ -12,19 +12,8 @@ class ChatController: UIViewController {
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var constraintTopTable: NSLayoutConstraint!
     @IBOutlet weak var dataTextField: UITextView!
-    var checkMessage: String = "" {
-        willSet (newValueOfRadius) {
-            if newValueOfRadius == "send" {
-                self.dataTextField.text = ""
-                self.tableView.reloadData()
-                self.tableView.scrollToBottom(isAnimated: true)
-            }
-            else if newValueOfRadius == "load" {
-                self.tableView.reloadData()
-                self.tableView.scrollToBottom()
-            }
-        }
-    }
+    let groupWaitResponseHttp = DispatchGroup()
+    var checkMessage: Bool = false
     
     var contact = ContactStorage.shared
     var contactIndex: Int!
@@ -78,21 +67,38 @@ class ChatController: UIViewController {
     // отправка
     @IBAction func send(_ sender: UIButton) {
         guard dataTextField.text != "" else { return }
-        httpTimer.stop()
+        groupWaitResponseHttp.enter()
         sender.configuration?.showsActivityIndicator = true
-        contact.sendMessage(contactID: contactIndex, text: dataTextField.text){ [self] in
-            checkMessage = "send"
+        contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text){ [self] in
+            checkMessage = true
         }
-        contact.sql.httpStatus = nil
-        sender.configuration?.showsActivityIndicator = false
-        httpTimer.start { self.loadMessages(delivered: "false")}
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+            sender.configuration?.showsActivityIndicator = false
+            dataTextField.text = ""
+            
+            if checkMessage {
+                tableView.reloadData()
+                tableView.scrollToBottom(isAnimated: true)
+                checkMessage = false
+            }
+            
+            contact.sql.httpStatus = nil
+        }
     }
 
     func loadMessages(delivered: String = "all") {
-        contact.getMessage(contactID: contactIndex, delivered: delivered){ [self] in
-            checkMessage = "load"
+        groupWaitResponseHttp.enter()
+        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){ [self] in
+            checkMessage = true
         }
-        contact.sql.httpStatus = nil
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+            if checkMessage {
+                tableView.reloadData()
+                if delivered == "all" { tableView.scrollToBottom() }
+                checkMessage = false
+            }
+            contact.sql.httpStatus = nil
+        }
     }
     
     //MARK: обрабатываем нотификации от клавиатуры
