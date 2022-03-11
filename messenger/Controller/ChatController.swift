@@ -13,7 +13,6 @@ class ChatController: UIViewController {
     @IBOutlet weak var constraintTopTable: NSLayoutConstraint!
     @IBOutlet weak var dataTextField: UITextView!
     let groupWaitResponseHttp = DispatchGroup()
-    var checkMessage: Bool = false
     
     var contact = ContactStorage.shared
     var contactIndex: Int!
@@ -67,6 +66,7 @@ class ChatController: UIViewController {
     
     // отправка
     @IBAction func send(_ sender: UIButton) {
+        var checkMessage = false
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
         httpTimer.stop()
@@ -79,7 +79,6 @@ class ChatController: UIViewController {
                 dataTextField.text = ""
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
-                checkMessage = false
             }
             sender.configuration?.showsActivityIndicator = false
             contact.sql.httpStatus = nil
@@ -88,6 +87,7 @@ class ChatController: UIViewController {
     }
 
     func loadMessages(delivered: String = "all") {
+        var checkMessage = false
         groupWaitResponseHttp.enter()
         contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){ [self] in
             checkMessage = true
@@ -103,7 +103,6 @@ class ChatController: UIViewController {
                 tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "false" { tableView.scrollToBottom(isAnimated: true) }
-                checkMessage = false
             }
             contact.sql.httpStatus = nil
         }
