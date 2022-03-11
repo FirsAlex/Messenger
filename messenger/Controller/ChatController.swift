@@ -71,7 +71,7 @@ class ChatController: UIViewController {
         groupWaitResponseHttp.enter()
         httpTimer.stop()
         sender.configuration?.showsActivityIndicator = true
-        contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text){ [self] in
+        contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text){
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
@@ -89,7 +89,7 @@ class ChatController: UIViewController {
     func loadMessages(delivered: String = "all") {
         var checkMessage = false
         groupWaitResponseHttp.enter()
-        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){ [self] in
+        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
