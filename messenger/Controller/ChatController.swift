@@ -56,6 +56,7 @@ class ChatController: UIViewController {
         removeForKeyboardNotifications()
         httpTimer.stop()
         contact.messages = []
+        contact.sql.httpStatus = nil
         print("ChatController - viewWillDisappear")
     }
     
@@ -69,7 +70,6 @@ class ChatController: UIViewController {
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
         httpTimer.stop()
-        contact.sql.httpStatus = nil
         sender.configuration?.showsActivityIndicator = true
         contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text){ [self] in
             checkMessage = true
@@ -82,13 +82,13 @@ class ChatController: UIViewController {
                 checkMessage = false
             }
             sender.configuration?.showsActivityIndicator = false
+            contact.sql.httpStatus = nil
             httpTimer.start { self.loadMessages(delivered: "false") }
         }
     }
 
     func loadMessages(delivered: String = "all") {
         groupWaitResponseHttp.enter()
-        contact.sql.httpStatus = nil
         contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){ [self] in
             checkMessage = true
         }
@@ -105,6 +105,7 @@ class ChatController: UIViewController {
                 else if delivered == "false" { tableView.scrollToBottom(isAnimated: true) }
                 checkMessage = false
             }
+            contact.sql.httpStatus = nil
         }
     }
     
