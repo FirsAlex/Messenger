@@ -9,14 +9,12 @@ import Foundation
 
 protocol UserProtocol {
     var id: String? { get set }
-    var userID: String? { get set }
     var telephone: String { get set }
     var name: String { get set }
 }
 
 struct User: UserProtocol {
     var id: String?
-    var userID: String?
     var telephone: String
     var name: String
 }
