@@ -68,21 +68,21 @@ class ChatController: UIViewController {
     @IBAction func send(_ sender: UIButton) {
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
+        httpTimer.stop()
         sender.configuration?.showsActivityIndicator = true
         contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text){ [self] in
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-            sender.configuration?.showsActivityIndicator = false
-            dataTextField.text = ""
-            
             if checkMessage {
+                dataTextField.text = ""
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
                 checkMessage = false
             }
-            
+            sender.configuration?.showsActivityIndicator = false
             contact.sql.httpStatus = nil
+            httpTimer.start { self.loadMessages(delivered: "false") }
         }
     }
 
