@@ -162,10 +162,8 @@ extension ChatController: UITableViewDataSource {
             incommingCell.incommingTime.text = message.createdAt
             resultCell = incommingCell
         }
-        
         return resultCell
     }
-    
 }
 
 // MARK: - делегирование ChatController

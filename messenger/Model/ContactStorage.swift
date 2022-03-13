@@ -199,13 +199,23 @@ class ContactStorage: ContactStorageProtocol {
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
                 for message in responseJSON {
+                    let id = message["id"] as! String
                     let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
                     let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
-                    messages.append(Message(id: message["id"] as! String, text: message["text"] as! String,
-                                            delivered: message["delivered"] as! Bool, contactID: contactID,
-                            createdAt: isodateFromString(message["createdAt"] as! String), type: type))
-                    sql.answerOnRequest = "Сообщения получены!"
+
+                    if (delivered == "all") || (delivered == "false" && type == .incomming) {
+                        messages.append(Message(id: id, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
+                    }
+                    else if (delivered == "false" && type == .outgoing) {
+                        messages = messages.map{ value in
+                            var newValue = value
+                            newValue.delivered = (value.id == id) ? false : true
+                            return newValue}
+                    }
+                    
                 }
+                    
+                sql.answerOnRequest = "Сообщения получены!"
                 if responseJSON.count != 0 {
                     completion()
                     updateMessageFromDB(contactID: contactID)
