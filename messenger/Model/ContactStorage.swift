@@ -24,7 +24,7 @@ protocol ContactStorageProtocol {
     func getMessage(group: DispatchGroup, contactID: Int, delivered: String, _ completion: @escaping () -> Void)
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void)
     func updateStatusIncommingMessageFromDB(contactID: String)
-    func getStatusOutgoingMessageFromDB(contactID: String)
+    func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String)
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void)
@@ -195,7 +195,6 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void) {
-        getStatusOutgoingMessageFromDB(contactID: contactID)
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=" + delivered, [:], "GET") { [self] in
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
@@ -210,7 +209,7 @@ class ContactStorage: ContactStorageProtocol {
                     sql.answerOnRequest = "Сообщения получены!"
                     updateStatusIncommingMessageFromDB(contactID: contactID)
                 }
-                group.leave()
+                getStatusOutgoingMessageFromDB(group: group, contactID: contactID)
             }
         }
     }
@@ -223,8 +222,9 @@ class ContactStorage: ContactStorageProtocol {
       }
     }
     
-    func getStatusOutgoingMessageFromDB(contactID: String) {
+    func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String) {
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=trueOutgoing", [:], "GET") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
                 for message in responseJSON {
@@ -238,6 +238,7 @@ class ContactStorage: ContactStorageProtocol {
                 if responseJSON.count != 0 {
                     sql.answerOnRequest = "Статусы сообщений получены!"
                 }
+                group.leave()
             }
         }
     }
