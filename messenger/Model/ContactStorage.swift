@@ -23,7 +23,8 @@ protocol ContactStorageProtocol {
     
     func getMessage(group: DispatchGroup, contactID: Int, delivered: String, _ completion: @escaping () -> Void)
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void)
-    func updateMessageFromDB(contactID: String)
+    func updateStatusIncommingMessageFromDB(contactID: String)
+    func getStatusOutgoingMessageFromDB(contactID: String)
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void)
@@ -199,38 +200,51 @@ class ContactStorage: ContactStorageProtocol {
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
                 for message in responseJSON {
-                    let id = message["id"] as! String
                     let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
                     let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
-
-                    if (delivered == "all") || (delivered == "false" && type == .incomming) {
-                        messages.append(Message(id: id, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
-                    }
-                    else if (delivered == "false" && type == .outgoing) {
-                        messages = messages.map{ value in
-                            var newValue = value
-                            newValue.delivered = (value.id == id) ? false : true
-                            return newValue}
-                    }
-                    
+                        messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
                 }
-                    
-                sql.answerOnRequest = "Сообщения получены!"
                 if responseJSON.count != 0 {
                     completion()
-                    updateMessageFromDB(contactID: contactID)
+                    sql.answerOnRequest = "Сообщения получены!"
+                    updateStatusIncommingMessageFromDB(contactID: contactID)
                 }
+                getStatusOutgoingMessageFromDB(contactID: contactID)
                 group.leave()
             }
         }
     }
     
-    func updateMessageFromDB(contactID: String) {
+    func updateStatusIncommingMessageFromDB(contactID: String) {
       sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
             if sql.httpStatus?.statusCode == 200 {
                 sql.answerOnRequest = "Сообщения обновлены!"
             }
       }
+    }
+    
+    func getStatusOutgoingMessageFromDB(contactID: String) {
+        sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=outgoingFalse", [:], "GET") { [self] in
+            let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
+            if sql.httpStatus?.statusCode == 200 {
+                for message in responseJSON {
+                    let id = message["id"] as! String
+                    messages = messages.map { value in
+                        var newValue = value
+                        newValue.delivered = (newValue.id == id) ? false : true
+                        return newValue
+                    }
+                }
+                if responseJSON.count == 0 {
+                    messages = messages.map { value in
+                        var newValue = value
+                        newValue.delivered = (newValue.type == .outgoing) ? true : newValue.delivered
+                        return newValue
+                    }
+                }
+                sql.answerOnRequest = "Статусы сообщений получены!"
+            }
+        }
     }
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void){

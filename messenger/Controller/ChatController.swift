@@ -36,7 +36,7 @@ class ChatController: UIViewController {
         tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
         loadMessages(delivered: "all")
-        httpTimer.start { self.loadMessages(delivered: "false") }
+        httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
         print("ChatController - viewDidLoad")
     }
     
@@ -82,7 +82,7 @@ class ChatController: UIViewController {
             }
             sender.configuration?.showsActivityIndicator = false
             contact.sql.httpStatus = nil
-            httpTimer.start { self.loadMessages(delivered: "false") }
+            httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
         }
     }
 
@@ -94,14 +94,14 @@ class ChatController: UIViewController {
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
             guard contact.sql.httpStatus?.statusCode == 200 else {
-                contact.showAlertMessage("Ошибка связи с БД", self)
+                contact.showAlertMessage("Ошибка БД", self)
                 navigationController?.popToRootViewController(animated: true)
                 return
             }
             if checkMessage {
                 tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
-                else if delivered == "false" { tableView.scrollToBottom(isAnimated: true) }
+                else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }
             contact.sql.httpStatus = nil
         }
