@@ -238,7 +238,7 @@ class ContactStorage: ContactStorageProtocol {
                 if responseJSON.count == 0 {
                     messages = messages.map { value in
                         var newValue = value
-                        newValue.delivered = (newValue.type == .outgoing) ? true : newValue.delivered
+                        newValue.delivered = (newValue.type == .outgoing && newValue.delivered == false) ? true : newValue.delivered
                         return newValue
                     }
                 }
