@@ -224,25 +224,20 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     func getStatusOutgoingMessageFromDB(contactID: String) {
-        sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=falseOutgoing", [:], "GET") { [self] in
+        sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=trueOutgoing", [:], "GET") { [self] in
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
                 for message in responseJSON {
                     let id = message["id"] as! String
                     messages = messages.map { value in
                         var newValue = value
-                        newValue.delivered = (newValue.id == id) ? false : true
+                        newValue.delivered = (newValue.id == id) ? true : newValue.delivered
                         return newValue
                     }
                 }
-                if responseJSON.count == 0 {
-                    messages = messages.map { value in
-                        var newValue = value
-                        newValue.delivered = (newValue.type == .outgoing && newValue.delivered == false) ? true : newValue.delivered
-                        return newValue
-                    }
+                if responseJSON.count != 0 {
+                    sql.answerOnRequest = "Статусы сообщений получены!"
                 }
-                sql.answerOnRequest = "Статусы сообщений получены!"
             }
         }
     }

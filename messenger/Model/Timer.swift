@@ -11,7 +11,7 @@ class MyTimer {
     weak var timer: Timer?
     
     func start(_ completion: @escaping() -> Void) {
-        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true){ timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true){ timer in
             completion()
         }
         //RunLoop.current.add(timer!, forMode: .common)
