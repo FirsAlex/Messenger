@@ -98,8 +98,8 @@ class ChatController: UIViewController {
                 navigationController?.popToRootViewController(animated: true)
                 return
             }
+            tableView.reloadData()
             if checkMessage {
-                tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }
