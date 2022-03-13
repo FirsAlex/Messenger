@@ -195,6 +195,7 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void) {
+        getStatusOutgoingMessageFromDB(contactID: contactID)
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=" + delivered, [:], "GET") { [self] in
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
@@ -209,7 +210,6 @@ class ContactStorage: ContactStorageProtocol {
                     sql.answerOnRequest = "Сообщения получены!"
                     updateStatusIncommingMessageFromDB(contactID: contactID)
                 }
-                getStatusOutgoingMessageFromDB(contactID: contactID)
                 group.leave()
             }
         }
