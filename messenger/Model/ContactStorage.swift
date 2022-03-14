@@ -216,9 +216,6 @@ class ContactStorage: ContactStorageProtocol {
     func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String) {
       sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
           sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
-          if sql.httpStatus?.statusCode == 200 {
-              group.leave()
-          }
       }
     }
     
