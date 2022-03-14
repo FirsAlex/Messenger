@@ -14,7 +14,7 @@ class MyTimer {
         timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true){ timer in
             completion()
         }
-        //RunLoop.current.add(timer!, forMode: .common)
+        RunLoop.current.add(timer!, forMode: .common)
     }
     
     func stop() {
