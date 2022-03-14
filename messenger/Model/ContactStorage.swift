@@ -24,7 +24,7 @@ protocol ContactStorageProtocol {
     func getMessage(group: DispatchGroup, contactID: Int, delivered: String, _ completion: @escaping () -> Void)
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void)
     func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String,_ completion: @escaping () -> Void)
-    func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void)
+    func updateStatusIncommingMessageToDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void)
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void)
@@ -218,7 +218,7 @@ class ContactStorage: ContactStorageProtocol {
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
                 if responseJSON.count != 0 {
-                    updateStatusIncommingMessageFromDB(group: group, contactID: contactID, responseJSON: responseJSON, completion)
+                    updateStatusIncommingMessageToDB(group: group, contactID: contactID, responseJSON: responseJSON, completion)
                 }
                 else {
                     group.leave()
@@ -227,7 +227,7 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void) {
+    func updateStatusIncommingMessageToDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void) {
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
                 if sql.httpStatus?.statusCode == 200 {
