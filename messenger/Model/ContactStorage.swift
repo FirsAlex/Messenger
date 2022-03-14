@@ -24,7 +24,7 @@ protocol ContactStorageProtocol {
     func getMessage(group: DispatchGroup, contactID: Int, delivered: String, _ completion: @escaping () -> Void)
     func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void)
     func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String,_ completion: @escaping () -> Void)
-    func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String)
+    func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void)
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void)
@@ -217,14 +217,8 @@ class ContactStorage: ContactStorageProtocol {
             sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
             let responseJSON = sql.responseJSON as? [[String:Any]] ?? []
             if sql.httpStatus?.statusCode == 200 {
-                for message in responseJSON {
-                    let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
-                    let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
-                        messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
-                }
                 if responseJSON.count != 0 {
-                    completion()
-                    updateStatusIncommingMessageFromDB(group: group, contactID: contactID)
+                    updateStatusIncommingMessageFromDB(group: group, contactID: contactID, responseJSON: responseJSON, completion)
                 }
                 else {
                     group.leave()
@@ -233,10 +227,16 @@ class ContactStorage: ContactStorageProtocol {
         }
     }
     
-    func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String) {
+    func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void) {
       sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
           sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
           if sql.httpStatus?.statusCode == 200 {
+              for message in responseJSON {
+                  let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
+                  let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
+                      messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
+              }
+              completion()
               group.leave()
           }
       }
