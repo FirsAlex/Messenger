@@ -86,7 +86,7 @@ class ChatController: UIViewController {
         }
     }
 
-    func loadMessages(delivered: String = "all") {
+    func loadMessages(delivered: String) {
         var checkMessage = false
         groupWaitResponseHttp.enter()
         contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){
