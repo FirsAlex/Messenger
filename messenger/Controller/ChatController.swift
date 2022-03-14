@@ -93,8 +93,8 @@ class ChatController: UIViewController {
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+            tableView.reloadData()
             if checkMessage {
-                tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }
