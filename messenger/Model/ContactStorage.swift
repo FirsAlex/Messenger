@@ -228,18 +228,18 @@ class ContactStorage: ContactStorageProtocol {
     }
     
     func updateStatusIncommingMessageFromDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void) {
-      sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
-          sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
-          if sql.httpStatus?.statusCode == 200 {
-              for message in responseJSON {
-                  let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
-                  let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
-                      messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
-              }
-              completion()
-              group.leave()
-          }
-      }
+        sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+                if sql.httpStatus?.statusCode == 200 {
+                    for message in responseJSON {
+                        let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
+                        let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
+                        messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
+                    }
+                    completion()
+                    group.leave()
+                }
+        }
     }
     
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void){
