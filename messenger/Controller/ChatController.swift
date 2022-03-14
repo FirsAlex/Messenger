@@ -82,9 +82,6 @@ class ChatController: UIViewController {
             }
             sender.configuration?.showsActivityIndicator = false
             httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
-            if contact.sql.httpStatus?.statusCode != 200 {
-                contact.showAlertMessage("Ошибка БД", self)
-            }
             contact.sql.httpStatus = nil
         }
     }
