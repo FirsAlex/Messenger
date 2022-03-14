@@ -81,8 +81,11 @@ class ChatController: UIViewController {
                 tableView.scrollToBottom(isAnimated: true)
             }
             sender.configuration?.showsActivityIndicator = false
-            contact.sql.httpStatus = nil
             httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
+            if contact.sql.httpStatus?.statusCode != 200 {
+                contact.showAlertMessage("Ошибка БД", self)
+            }
+            contact.sql.httpStatus = nil
         }
     }
 
@@ -93,13 +96,8 @@ class ChatController: UIViewController {
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-            guard contact.sql.httpStatus?.statusCode == 200 else {
-                contact.showAlertMessage("Ошибка БД", self)
-                navigationController?.popToRootViewController(animated: true)
-                return
-            }
-            tableView.reloadData()
             if checkMessage {
+                tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }
