@@ -35,6 +35,7 @@ class ChatController: UIViewController {
         let outgoingCellNib = UINib(nibName: "MessageFromUserCell", bundle: nil)
         tableView.register(outgoingCellNib, forCellReuseIdentifier: "MessageFromUserCell")
         registerForKeyboardNotifications()
+        contact.messages = []
         loadMessages(delivered: "all")
         httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
         print("ChatController - viewDidLoad")
@@ -54,7 +55,6 @@ class ChatController: UIViewController {
         super.viewWillDisappear(animated)
         removeForKeyboardNotifications()
         httpTimer.stop()
-        contact.messages = []
         contact.sql.httpStatus = nil
         print("ChatController - viewWillDisappear")
     }

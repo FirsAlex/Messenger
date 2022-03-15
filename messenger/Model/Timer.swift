@@ -14,6 +14,7 @@ class MyTimer {
         timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true){ timer in
             completion()
         }
+        //работа Timer при взаимодействии с интерфейсом
         RunLoop.current.add(timer!, forMode: .common)
     }
     

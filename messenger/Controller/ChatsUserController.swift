@@ -11,6 +11,7 @@ class ChatsUserController: UITableViewController {
     let groupWaitResponseHttp = DispatchGroup()
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
+    var httpTimer = MyTimer()
     
     override func loadView() {
         super.loadView()
@@ -45,6 +46,7 @@ class ChatsUserController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController!.isToolbarHidden = true
+        httpTimer.stop()
         print("Chats - viewWillDisappear")
     }
     
@@ -52,6 +54,8 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
+        contact.messages = []
+        httpTimer.start { self.loadLastMessages()}
         print("Chats - viewWillAppear")
     }
     
@@ -115,6 +119,17 @@ class ChatsUserController: UITableViewController {
         self.present(alertController, animated: true)
     }
     
+    func loadLastMessages() {
+        for contactIndex in (0...contact.contacts.count) {
+            groupWaitResponseHttp.enter()
+            contact.getLastMessageContacts(group: groupWaitResponseHttp, contactID: contactIndex)
+            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+                tableView.reloadData()
+                contact.sql.httpStatus = nil
+            }
+        }
+    }
+
     // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
@@ -123,17 +138,27 @@ class ChatsUserController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 10
+        return contact.messages.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //получение переиспользуемой кастомной ячейки по ее идентификатору
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
-        //заполняем ячейку данными
-        chatsCell.nameContact.text = "Юлька"
-        chatsCell.lastMessageTime.text = "01.02.2022"
-        chatsCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
-        chatsCell.lastMessage.text = "Вы: Трам пам пам очень большой прибольшой текстище текстовый такой здаровый здоровенный егегей!!!"
+        let message = contact.messages[indexPath.row]
+        
+        chatsCell.nameContact.text = contact.contacts[indexPath.row].name
+        chatsCell.lastMessageTime.text = message.createdAt
+        
+        if (message.type == .outgoing) {
+            chatsCell.lastMessage.text = "Вы:" + message.text
+            if message.delivered {
+                chatsCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
+            }
+            else { chatsCell.symbol.text = "\u{2713}" }
+        }
+        else if message.type == .incomming {
+            chatsCell.lastMessage.text = message.text
+        }
+  
         return chatsCell
     }
 

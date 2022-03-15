@@ -29,6 +29,9 @@ protocol ContactStorageProtocol {
     func sendMessage(group: DispatchGroup, contactID: Int, text: String, _ completion: @escaping () -> Void)
     func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping () -> Void)
     
+    func getLastMessageContacts(group: DispatchGroup, contactID: Int)
+    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String)
+    
     func isodateFromString(_ isoString: String) -> String
 }
 
@@ -191,7 +194,6 @@ class ContactStorage: ContactStorageProtocol {
                 group.leave()
             }
         }
-        
     }
     
     func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String,_ completion: @escaping () -> Void) {
@@ -263,6 +265,37 @@ class ContactStorage: ContactStorageProtocol {
             if sql.httpStatus?.statusCode == 200 {
                 messages.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: .outgoing))
                 completion()
+                group.leave()
+            }
+        }
+    }
+    
+    func getLastMessageContacts(group: DispatchGroup, contactID: Int) {
+        sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            let responseJSON = sql.responseJSON as? [String:Any]
+            if sql.httpStatus?.statusCode == 200 {
+                getLastMessageContactsFromDB(group: group, contactID: responseJSON?["id"] as! String)
+            }
+            else if sql.httpStatus?.statusCode == 404 {
+                sql.answerOnRequest = "Контакт не зарегистрирован в системе!"
+                group.leave()
+            }
+        }
+    }
+    
+    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String) {
+        sql.sendRequest("messages/last_between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=all", [:], "GET") { [self] in
+            sql.answerOnRequestError(group: group, statusCode: sql.httpStatus?.statusCode)
+            let responseJSON = sql.responseJSON as? [String:Any]
+            if sql.httpStatus?.statusCode == 200 {
+                let toUser = (responseJSON!["toUser"] as! Dictionary<String, String>)["id"]
+                let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
+                messages.append(Message(id: responseJSON?["id"] as! String, text: responseJSON?["text"] as! String, delivered: responseJSON?["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: type))
+                group.leave()
+            }
+            else if sql.httpStatus?.statusCode == 404 {
+                sql.answerOnRequest = "У контакта нет сообщений!"
                 group.leave()
             }
         }
