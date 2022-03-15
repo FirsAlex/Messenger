@@ -120,14 +120,17 @@ class ChatsUserController: UITableViewController {
     }
     
     func loadLastMessages() {
-        for contactIndex in (0...contact.contacts.count) {
+        for contactIndex in (0..<contact.contacts.count) {
             groupWaitResponseHttp.enter()
             contact.getLastMessageContacts(group: groupWaitResponseHttp, contactID: contactIndex)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-                tableView.reloadData()
+                if contact.sql.httpStatus?.statusCode != 200 {
+                    contact.messages.append(Message(id: "",text: "",delivered: false,contactID: "",createdAt: "",type: .outgoing))
+                }
                 contact.sql.httpStatus = nil
             }
         }
+        tableView.reloadData()
     }
 
     // MARK: - Table view data source
@@ -144,6 +147,7 @@ class ChatsUserController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
         let message = contact.messages[indexPath.row]
+        guard message.id != "" else { return chatsCell }
         
         chatsCell.nameContact.text = contact.contacts[indexPath.row].name
         chatsCell.lastMessageTime.text = message.createdAt
