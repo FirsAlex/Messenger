@@ -12,6 +12,7 @@ class ChatsUserController: UITableViewController {
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
     var httpTimer = MyTimer()
+    var contactsIndexLastMessage = Array<Int>()
     
     override func loadView() {
         super.loadView()
@@ -124,9 +125,7 @@ class ChatsUserController: UITableViewController {
             groupWaitResponseHttp.enter()
             contact.getLastMessageContacts(group: groupWaitResponseHttp, contactID: contactIndex)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-                if contact.sql.httpStatus?.statusCode != 200 {
-                    contact.messages.append(Message(id: "",text: "",delivered: false,contactID: "",createdAt: "",type: .outgoing))
-                }
+                if contact.sql.httpStatus?.statusCode == 200 { contactsIndexLastMessage.append(contactIndex) }
                 contact.sql.httpStatus = nil
             }
         }
@@ -147,11 +146,9 @@ class ChatsUserController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
         let message = contact.messages[indexPath.row]
-        guard message.id != "" else { return chatsCell }
         
-        chatsCell.nameContact.text = contact.contacts[indexPath.row].name
+        chatsCell.nameContact.text = contact.contacts[contactsIndexLastMessage[indexPath.row]].name
         chatsCell.lastMessageTime.text = message.createdAt
-        
         if (message.type == .outgoing) {
             chatsCell.lastMessage.text = "Вы:" + message.text
             if message.delivered {
