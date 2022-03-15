@@ -55,7 +55,6 @@ class ChatController: UIViewController {
         super.viewWillDisappear(animated)
         removeForKeyboardNotifications()
         httpTimer.stop()
-        contact.sql.httpStatus = nil
         print("ChatController - viewWillDisappear")
     }
     
@@ -66,30 +65,26 @@ class ChatController: UIViewController {
     
     // отправка
     @IBAction func send(_ sender: UIButton) {
-        var checkMessage = false
         guard dataTextField.text != "" else { return }
         groupWaitResponseHttp.enter()
         httpTimer.stop()
         sender.configuration?.showsActivityIndicator = true
-        contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text){
-            checkMessage = true
-        }
+        let (status, _) = contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text)
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-            if checkMessage {
+            if status == 200 {
                 dataTextField.text = ""
                 tableView.reloadData()
                 tableView.scrollToBottom(isAnimated: true)
             }
             sender.configuration?.showsActivityIndicator = false
             httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
-            contact.sql.httpStatus = nil
         }
     }
 
     func loadMessages(delivered: String) {
         var checkMessage = false
         groupWaitResponseHttp.enter()
-        contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){
+        (_,_) = contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){
             checkMessage = true
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
@@ -98,7 +93,6 @@ class ChatController: UIViewController {
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }
-            contact.sql.httpStatus = nil
         }
     }
     

@@ -11,8 +11,6 @@ class ChatsUserController: UITableViewController {
     let groupWaitResponseHttp = DispatchGroup()
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
-    var httpTimer = MyTimer()
-    var contactsIndexLastMessage = Array<Int>()
     
     override func loadView() {
         super.loadView()
@@ -23,13 +21,12 @@ class ChatsUserController: UITableViewController {
         else {
             spinner = contact.startSpinner("Загрузка контактов", self)
             groupWaitResponseHttp.enter()
-            contact.loadContactsFromDB(group: groupWaitResponseHttp)
+            let (status, answerOnRequest) = contact.loadContactsFromDB(group: groupWaitResponseHttp)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
                 spinner?.dismiss(animated: true){
-                    if contact.sql.httpStatus?.statusCode != 200 {
-                        contact.showAlertMessage("Загрузка контактов", self)
+                    if status != 200 {
+                        contact.showAlertMessage("Загрузка контактов", answerOnRequest, self)
                     }
-                    contact.sql.httpStatus = nil
                 }
             }
         }
@@ -47,7 +44,6 @@ class ChatsUserController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController!.isToolbarHidden = true
-        httpTimer.stop()
         print("Chats - viewWillDisappear")
     }
     
@@ -55,8 +51,6 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
-        contact.messages = []
-        httpTimer.start { self.loadLastMessages()}
         print("Chats - viewWillAppear")
     }
     
@@ -74,6 +68,7 @@ class ChatsUserController: UITableViewController {
     
     // MARK: создание учётной записи или загрузка текущей с сервера
     @IBAction func showMyContact() {
+        var answerOnRequest: String?
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите Ваше имя и телефон", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -96,19 +91,18 @@ class ChatsUserController: UITableViewController {
             if name != "" && telephone != "" {
                 groupWaitResponseHttp.enter()
                 if contact.myUser == nil {
-                    contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
+                    (_, answerOnRequest) = contact.getMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
                 }
                 else {
-                    contact.patchMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
+                    (_, answerOnRequest) = contact.patchMyUserFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name)
                 }
             }
             else {
-                contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!"
+                answerOnRequest = "Одно из обязательных полей не заполнено!"
             }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
-                contact.sql.httpStatus = nil
+                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", answerOnRequest, self)})
             }
         }
         // кнопка отмены
@@ -121,15 +115,15 @@ class ChatsUserController: UITableViewController {
     }
     
     func loadLastMessages() {
+        guard contact.contacts.count != 0 else { return }
+        contact.messages = []
         for contactIndex in (0..<contact.contacts.count) {
             groupWaitResponseHttp.enter()
             contact.getLastMessageContacts(group: groupWaitResponseHttp, contactID: contactIndex)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-                if contact.sql.httpStatus?.statusCode == 200 { contactsIndexLastMessage.append(contactIndex) }
-                contact.sql.httpStatus = nil
+                tableView.reloadData()
             }
         }
-        tableView.reloadData()
     }
 
     // MARK: - Table view data source
@@ -147,10 +141,10 @@ class ChatsUserController: UITableViewController {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
         let message = contact.messages[indexPath.row]
         
-        chatsCell.nameContact.text = contact.contacts[contactsIndexLastMessage[indexPath.row]].name
+        //chatsCell.nameContact.text = contact.contacts[].name
         chatsCell.lastMessageTime.text = message.createdAt
         if (message.type == .outgoing) {
-            chatsCell.lastMessage.text = "Вы:" + message.text
+            chatsCell.lastMessage.text = "Вы: " + message.text
             if message.delivered {
                 chatsCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
             }

@@ -65,6 +65,7 @@ class ContactsController: UITableViewController {
     }
 
     func editContact(contactID: Int? = nil) {
+        var answerOnRequest: String?
         // создание Alert Controller
         let alertController = UIAlertController(title: "Введите имя и телефон контакта", message: "(обязательные поля)", preferredStyle: .alert)
         // добавляем первое поле в Alert Controller
@@ -86,14 +87,15 @@ class ContactsController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 groupWaitResponseHttp.enter()
-                (contactID == nil) ? contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) : contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID!)
+                (_, answerOnRequest) = (contactID == nil) ?
+                contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) :
+                contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID!)
             }
-            else { contact.sql.answerOnRequest = "Одно из обязательных полей не заполнено!" }
+            else { answerOnRequest = "Одно из обязательных полей не заполнено!" }
             
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", self)})
+                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", answerOnRequest, self)})
                 tableView.reloadData()
-                contact.sql.httpStatus = nil
             }
         }
         // кнопка отмены
@@ -107,16 +109,16 @@ class ContactsController: UITableViewController {
     
     //MARK: Обработка swipe влево - удаление
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        var answerOnRequest: String?
         // действие удаления
         let actionDelete = UIContextualAction(style: .destructive, title: "\u{1F5D1}") { [self] _,_,_ in
             spinner = contact.startSpinner("Удаление", self)
             groupWaitResponseHttp.enter()
-            contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
+            (_, answerOnRequest) = contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
             groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
                 // удаляем строку, соответствующую задаче
-                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", self)})
+                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", answerOnRequest, self)})
                 tableView.reloadData()
-                contact.sql.httpStatus = nil
             }
         }
         // действие изменить

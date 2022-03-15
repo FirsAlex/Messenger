@@ -9,24 +9,19 @@ import Foundation
 import UIKit
 
 protocol SqlRequestProtocol {
-    var responseJSON: Any? { get set }
-    var httpStatus: HTTPURLResponse? { get set }
-    var answerOnRequest: String? { get set }
-    func answerOnRequestError(group: DispatchGroup, statusCode: Int?)
+    func answerOnRequestError(group: DispatchGroup, statusCode: Int?) -> String?
     func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
-                     _ completion: @escaping () -> Void)
+                     _ completion: @escaping ( _ httpStatus: HTTPURLResponse?, _ responseJSON: Any?) -> Void)
 }
 
 class SqlRequest: SqlRequestProtocol{
-    var httpStatus: HTTPURLResponse?
-    var answerOnRequest: String?
-    var responseJSON: Any?
-    
     init() {
     }
     
     func sendRequest(_ myUrlRoute: String = "", _ json: [String: Any] = [:], _ httpMethod: String,
-                     _ completion: @escaping () -> Void) {
+                     _ completion: @escaping ( _ httpStatus: HTTPURLResponse?, _ responseJSON: Any?) -> Void) {
+        var httpStatus: HTTPURLResponse?
+        var responseJSON: Any?
         // create request
         let url = URL(string: "https://server.firsalex.keenetic.name/\(myUrlRoute)")!
         var request = URLRequest(url: url)
@@ -45,33 +40,33 @@ class SqlRequest: SqlRequestProtocol{
             //print("Answer in request: \(String(describing: response))")
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
-                completion()
                 return
             }
             
-            self.httpStatus = response as? HTTPURLResponse
-            self.responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            completion()
+            httpStatus = response as? HTTPURLResponse
+            responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+            completion(httpStatus, responseJSON)
         }
         task.resume()
     }
     
-    func answerOnRequestError(group: DispatchGroup, statusCode: Int?) {
+    func answerOnRequestError(group: DispatchGroup, statusCode: Int?) -> String? {
         if statusCode == 502 {
-            answerOnRequest = "Нет связи с сервером 502 Bad Gateway!"
             group.leave()
+            return "Нет связи с сервером 502 Bad Gateway!"
         }
         else if statusCode == nil {
-            answerOnRequest = "Сервер не ответил на запрос!"
             group.leave()
+            return "Сервер не ответил на запрос!"
         }
         else if statusCode == 400 {
-            answerOnRequest = "Неправильный параметр в строке запроса!"
             group.leave()
+            return "Неправильный параметр в строке запроса!"
         }
         else if statusCode == 500 {
-            answerOnRequest = "Нарушение уникальности поля, такой телефон уже существует у аккаунта!"
             group.leave()
+            return "Нарушение уникальности поля, такой телефон уже существует у аккаунта!"
         }
+        return nil
     }
 }
