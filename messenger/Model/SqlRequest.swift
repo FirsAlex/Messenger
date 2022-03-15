@@ -9,9 +9,9 @@ import Foundation
 import UIKit
 
 protocol SqlRequestProtocol {
-    func answerOnRequestError(group: DispatchGroup, statusCode: Int?) -> String?
+    func answerOnRequestError(group: DispatchGroup, statusCode: Int?,_ completion: (Int?, String) -> ())
     func sendRequest(_ myUrlRoute: String, _ json: [String: Any], _ httpMethod: String,
-                     _ completion: @escaping ( _ httpStatus: HTTPURLResponse?, _ responseJSON: Any?) -> Void)
+                     _ completion: @escaping ( _ httpStatus: HTTPURLResponse?, _ responseJSON: Any?) -> Void) -> Void
 }
 
 class SqlRequest: SqlRequestProtocol{
@@ -19,7 +19,7 @@ class SqlRequest: SqlRequestProtocol{
     }
     
     func sendRequest(_ myUrlRoute: String = "", _ json: [String: Any] = [:], _ httpMethod: String,
-                     _ completion: @escaping ( _ httpStatus: HTTPURLResponse?, _ responseJSON: Any?) -> Void) {
+                     _ completion: @escaping ( _ httpStatus: HTTPURLResponse?, _ responseJSON: Any?) -> Void) -> Void {
         var httpStatus: HTTPURLResponse?
         var responseJSON: Any?
         // create request
@@ -36,7 +36,7 @@ class SqlRequest: SqlRequestProtocol{
         }
         
         let task = URLSession.shared.dataTask(with: request) {
-            data, response, error in
+            (data, response, error) -> Void in
             //print("Answer in request: \(String(describing: response))")
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
@@ -50,23 +50,22 @@ class SqlRequest: SqlRequestProtocol{
         task.resume()
     }
     
-    func answerOnRequestError(group: DispatchGroup, statusCode: Int?) -> String? {
+    func answerOnRequestError(group: DispatchGroup, statusCode: Int?,_ completion: (Int?, String) -> ()) {
         if statusCode == 502 {
+            completion(statusCode, "Нет связи с сервером 502 Bad Gateway!")
             group.leave()
-            return "Нет связи с сервером 502 Bad Gateway!"
         }
         else if statusCode == nil {
+            completion(statusCode, "Сервер не ответил на запрос!")
             group.leave()
-            return "Сервер не ответил на запрос!"
         }
         else if statusCode == 400 {
+            completion(statusCode, "Неправильный параметр в строке запроса!")
             group.leave()
-            return "Неправильный параметр в строке запроса!"
         }
         else if statusCode == 500 {
+            completion(statusCode, "Нарушение уникальности поля, такой телефон уже существует у аккаунта!")
             group.leave()
-            return "Нарушение уникальности поля, такой телефон уже существует у аккаунта!"
         }
-        return nil
     }
 }

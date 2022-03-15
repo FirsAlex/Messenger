@@ -9,28 +9,28 @@ import Foundation
 import UIKit
 
 protocol ContactStorageProtocol {
-    func loadContactsFromDB(group: DispatchGroup) -> (Int?, String?)
-    func saveContactToDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?)
-    func deleteContactFromDB(group: DispatchGroup, contactID: Int) -> (Int?, String?)
-    func updateContactFromDB(group: DispatchGroup, telephone: String, name: String, contactID: Int) -> (Int?, String?)
+    func loadContactsFromDB(group: DispatchGroup, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func saveContactToDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func deleteContactFromDB(contactID: Int, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func updateContactFromDB(telephone: String, name: String, contactID: Int, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
     func loadMyUser()
     func saveMyUser(_ user: UserProtocol)
     
-    func getMyUserFromDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?)
-    func postMyUserToDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?)
-    func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?)
+    func getMyUserFromDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func postMyUserToDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func patchMyUserFromDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
-    func getMessage(group: DispatchGroup, contactID: Int, delivered: String, _ completion: @escaping () -> Void) -> (Int?, String?)
-    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void) -> (Int?, String?)
-    func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String,_ completion: @escaping () -> Void) -> (Int?, String?)
-    func updateStatusIncommingMessageToDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void) -> (Int?, String?)
+    func getMessage(contactID: Int, delivered: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func updateStatusIncommingMessageToDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
-    func sendMessage(group: DispatchGroup, contactID: Int, text: String) -> (Int?, String?)
-    func sendMessageToDB(group: DispatchGroup, contactID: String, text: String) -> (Int?, String?)
+    func sendMessage(contactID: Int, text: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func sendMessageToDB(group: DispatchGroup, contactID: String, text: String,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
-    func getLastMessageContacts(group: DispatchGroup, contactID: Int) -> (Int?, String?)
-    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String) -> (Int?, String?)
+    func getLastMessageContacts(contactID: Int,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
     func isodateFromString(_ isoString: String) -> String
 }
@@ -73,161 +73,212 @@ class ContactStorage: ContactStorageProtocol {
         myUser = User(id: id, telephone: telephone, name: name)
     }
     
-    func getMyUserFromDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?) {
+    func getMyUserFromDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         //GET
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("users/by_telephone/" + telephone, [:], "GET") { [self] httpStatus,responseJSON in
             let responseJSON = responseJSON as? [String:String]
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-            if httpStatus?.statusCode == 200 {
-                myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
-                (status, answerOnRequest) = loadContactsFromDB(group: group)
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
             }
-            else if httpStatus?.statusCode == 404 {
-                (status, answerOnRequest) = postMyUserToDB(group: group, telephone: telephone, name: name)
+            if status == 200 {
+                myUser = User(id: responseJSON?["id"], telephone: telephone, name: (responseJSON?["name"] ?? ""))
+                loadContactsFromDB(group: groupWaitResponseHttp){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
+            }
+            else if status == 404 {
+                postMyUserToDB(telephone: telephone, name: name){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
             }
         }
-        return (status, answerOnRequest)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
 
-    func postMyUserToDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?) {
+    func postMyUserToDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         //POST
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("users", ["name":name, "telephone":telephone], "POST") { [self] httpStatus,responseJSON in
             let responseJSON = responseJSON as? [String:String]
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-            if httpStatus?.statusCode == 200 {
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
+            if status == 200 {
                 myUser = User(id: responseJSON?["id"], telephone: telephone, name: name)
-                group.leave()
+                groupWaitResponseHttp.leave()
             }
         }
-        return (status, answerOnRequest)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
-    func patchMyUserFromDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?) {
+    func patchMyUserFromDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         //PATCH
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("users/"+(myUser!.id ?? ""), ["name":name, "telephone":telephone], "PATCH"){ [self] httpStatus,_ in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-            if httpStatus?.statusCode == 200 {
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
+            if status == 200 {
                 myUser?.name = name
                 myUser?.telephone = telephone
-                group.leave()
+                groupWaitResponseHttp.leave()
             }
         }
-        return (status, answerOnRequest)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
     //MARK: работа с контактами аккаунта
-    func loadContactsFromDB(group: DispatchGroup) -> (Int?, String?) {
+    func loadContactsFromDB(group: DispatchGroup,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
         sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), [:], "GET") { [self] httpStatus,responseJSON in
             let responseJSON = responseJSON as? [[String:Any]] ?? []
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-            if httpStatus?.statusCode == 200 {
+            sql.answerOnRequestError(group: group, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
+            if status == 200 {
                 for contact in responseJSON {
                     contacts.append(User(id: contact["id"] as? String, telephone: (contact["telephone"] as? String ?? ""),
                                          name: (contact["name"] as? String ?? "")))
                 }
+                completion(status, answerOnRequest)
                 group.leave()
             }
         }
-        return (status, answerOnRequest)
     }
     
-    func saveContactToDB(group: DispatchGroup, telephone: String, name: String) -> (Int?, String?) {
+    func saveContactToDB(telephone: String, name: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
         if (self.contacts.filter{$0.telephone == telephone}.count == 0) {
             //POST
+            groupWaitResponseHttp.enter()
             sql.sendRequest("contacts/by_user/" + (myUser?.id ?? ""), ["name":name, "telephone":telephone], "POST") { [self]  httpStatus,responseJSON in
                 let responseJSON = responseJSON as? [String:Any]
-                answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
                 status = httpStatus?.statusCode
-                if httpStatus?.statusCode == 200 {
+                sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
+                if status == 200 {
                     contacts.append(User(id: responseJSON?["id"] as? String, telephone: telephone, name: name))
                     answerOnRequest = "Контакт сохранён!"
-                    group.leave()
+                    groupWaitResponseHttp.leave()
                 }
             }
         }
-        else { answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
-        return (status, answerOnRequest)
+        else { answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; groupWaitResponseHttp.leave() }
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
-    func deleteContactFromDB(group: DispatchGroup, contactID: Int) -> (Int?, String?){
+    func deleteContactFromDB(contactID: Int, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         //DELETE
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("contacts/" + (contacts[contactID].id ?? ""), [:], "DELETE"){ [self] httpStatus,_ in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-            if httpStatus?.statusCode == 200 {
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
+            if status == 200 {
                 contacts.remove(at: contactID)
                 answerOnRequest = "Контакт удалён!"
-                group.leave()
+                groupWaitResponseHttp.leave()
             }
         }
-        return (status, answerOnRequest)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
-    func updateContactFromDB(group: DispatchGroup, telephone: String, name: String, contactID: Int) -> (Int?, String?) {
+    func updateContactFromDB(telephone: String, name: String, contactID: Int, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        
         let indexFind = self.contacts.firstIndex(where: {$0.telephone == telephone})
         if (indexFind == contactID || indexFind == nil) {
             //PATCH
+            groupWaitResponseHttp.enter()
             sql.sendRequest("contacts/" + (contacts[contactID].id ?? ""), ["name":name, "telephone":telephone], "PATCH") { [self]  httpStatus, _ in
-                answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
                 status = httpStatus?.statusCode
-                if httpStatus?.statusCode == 200 {
+                sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
+                if status == 200 {
                     contacts[contactID].name = name
                     contacts[contactID].telephone = telephone
                     answerOnRequest = "Контакт изменён!"
-                    group.leave()
+                    groupWaitResponseHttp.leave()
                 }
             }
         }
-        else { answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; group.leave() }
-        return (status, answerOnRequest)
+        else { answerOnRequest = "Указанный номер телефона присутствует среди Ваших контактов!"; groupWaitResponseHttp.leave() }
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
     //MARK: работа с сообщениями
-    func getMessage(group: DispatchGroup, contactID: Int, delivered: String,_ completion: @escaping () -> Void) -> (Int?, String?){
+    func getMessage(contactID: Int, delivered: String,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew }
             let responseJSON = responseJSON as? [String:Any]
-            if httpStatus?.statusCode == 200 {
-                (status, answerOnRequest) =
-                getStatusOutgoingMessageFromDB(group: group, contactID: responseJSON?["id"] as! String, delivered: delivered, completion)
+            if status == 200 {
+                getStatusOutgoingMessageFromDB(group: groupWaitResponseHttp, contactID: responseJSON?["id"] as! String, delivered: delivered){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
             }
-            else if httpStatus?.statusCode == 404 {
+            else if status == 404 {
                 answerOnRequest = "Контакт не зарегистрирован в системе!"
-                group.leave()
+                groupWaitResponseHttp.leave()
             }
         }
-        return (status, answerOnRequest)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
-    func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String,_ completion: @escaping () -> Void) -> (Int?, String?) {
+    func getStatusOutgoingMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=trueOutgoing", [:], "GET") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
+            sql.answerOnRequestError(group: group, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
             let responseJSON = responseJSON as? [[String:Any]] ?? []
-            if httpStatus?.statusCode == 200 {
+            if status == 200 {
                 for message in responseJSON {
                     let id = message["id"] as! String
                     messages = messages.map { value in
@@ -236,120 +287,145 @@ class ContactStorage: ContactStorageProtocol {
                         return newValue
                     }
                 }
-                (status, answerOnRequest) = getMessageFromDB(group: group, contactID: contactID, delivered: delivered, completion)
+                getMessageFromDB(group: group, contactID: contactID, delivered: delivered, completion)
             }
         }
-        return (status, answerOnRequest)
     }
     
-    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping () -> Void) -> (Int?, String?) {
+    func getMessageFromDB(group: DispatchGroup, contactID: String, delivered: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=" + delivered, [:], "GET") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
+            sql.answerOnRequestError(group: group, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
             let responseJSON = responseJSON as? [[String:Any]] ?? []
-            if httpStatus?.statusCode == 200 {
+            if status == 200 {
                 if responseJSON.count != 0 {
-                    (status, answerOnRequest) = updateStatusIncommingMessageToDB(group: group, contactID: contactID, responseJSON: responseJSON, completion)
+                    updateStatusIncommingMessageToDB(group: group, contactID: contactID, responseJSON: responseJSON){ statusNew, answerOnRequestNew in
+                        status = statusNew; answerOnRequest = answerOnRequestNew
+                    }
                 }
                 else {
+                    completion(status, answerOnRequest)
                     group.leave()
                 }
             }
         }
-        return (status, answerOnRequest)
     }
     
-    func updateStatusIncommingMessageToDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping () -> Void) -> (Int?, String?) {
+    func updateStatusIncommingMessageToDB(group: DispatchGroup, contactID: String, responseJSON: [[String:Any]], _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
         sql.sendRequest("messages/between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID, [:], "PATCH") { [self] httpStatus,_ in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-                if httpStatus?.statusCode == 200 {
-                    for message in responseJSON {
-                        let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
-                        let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
-                        messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
-                    }
-                    completion()
-                    group.leave()
-                }
-        }
-        return (status, answerOnRequest)
-    }
-    
-    func sendMessage(group: DispatchGroup, contactID: Int, text: String) -> (Int?, String?){
-        var answerOnRequest: String?
-        var status: Int?
-        sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
-            status = httpStatus?.statusCode
-            let responseJSON = responseJSON as? [String:Any]
-            if httpStatus?.statusCode == 200 {
-                (status, answerOnRequest) = sendMessageToDB(group: group, contactID: responseJSON?["id"] as! String, text: text)
+            sql.answerOnRequestError(group: group, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
             }
-            else if httpStatus?.statusCode == 404 {
-                answerOnRequest = "Контакт не зарегистрирован в системе!"
+            if status == 200 {
+                for message in responseJSON {
+                    let toUser = (message["toUser"] as! Dictionary<String, String>)["id"]
+                    let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
+                    messages.append(Message(id: message["id"] as! String, text: message["text"] as! String, delivered: message["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(message["createdAt"] as! String), type: type))
+                }
                 group.leave()
             }
+            else { status = 404 }
         }
-        return (status, answerOnRequest)
+        completion(status, answerOnRequest)
     }
     
-    func sendMessageToDB(group: DispatchGroup, contactID: String, text: String) -> (Int?, String?) {
+    func sendMessage(contactID: Int, text: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
+        var answerOnRequest: String?
+        var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
+        sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] httpStatus,responseJSON in
+            status = httpStatus?.statusCode
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
+            let responseJSON = responseJSON as? [String:Any]
+            if status == 200 {
+                sendMessageToDB(group: groupWaitResponseHttp, contactID: responseJSON?["id"] as! String, text: text){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
+            }
+            else if status == 404 {
+                answerOnRequest = "Контакт не зарегистрирован в системе!"
+                groupWaitResponseHttp.leave()
+            }
+        }
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
+    }
+    
+    func sendMessageToDB(group: DispatchGroup, contactID: String, text: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()){
         var answerOnRequest: String?
         var status: Int?
         sql.sendRequest("messages", ["text":text, "fromUserID": myUser!.id ?? "", "toUserID": contactID], "POST") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
+            sql.answerOnRequestError(group: group, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
             let responseJSON = responseJSON as? [String:Any]
-            if httpStatus?.statusCode == 200 {
+            if status == 200 {
                 messages.append(Message(id: responseJSON?["id"] as! String, text: text, delivered: false, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: .outgoing))
                 group.leave()
             }
         }
-        return (status, answerOnRequest)
+        completion(status, answerOnRequest)
     }
     
-    func getLastMessageContacts(group: DispatchGroup, contactID: Int) -> (Int?, String?){
+    func getLastMessageContacts(contactID: Int, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()){
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("users/by_telephone/" + contacts[contactID].telephone, [:], "GET") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
-            let responseJSON = responseJSON as? [String:Any]
-            if httpStatus?.statusCode == 200 {
-                (status, answerOnRequest) = getLastMessageContactsFromDB(group: group, contactID: responseJSON?["id"] as! String)
+            sql.answerOnRequestError(group: groupWaitResponseHttp, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
             }
-            else if httpStatus?.statusCode == 404 {
+            let responseJSON = responseJSON as? [String:Any]
+            if status == 200 {
+                getLastMessageContactsFromDB(group: groupWaitResponseHttp, contactID: responseJSON?["id"] as! String){ statusNew, answerOnRequestNew in
+                    status = statusNew; answerOnRequest = answerOnRequestNew
+                }
+            }
+            else if status == 404 {
                 answerOnRequest = "Контакт не зарегистрирован в системе!"
-                group.leave()
+                groupWaitResponseHttp.leave()
             }
         }
-        return (status, answerOnRequest)
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
+            completion(status, answerOnRequest)
+        }
     }
     
-    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String) -> (Int?, String?) {
+    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
         sql.sendRequest("messages/last_between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=all", [:], "GET") { [self] httpStatus,responseJSON in
-            answerOnRequest = sql.answerOnRequestError(group: group, statusCode: httpStatus?.statusCode)
             status = httpStatus?.statusCode
+            sql.answerOnRequestError(group: group, statusCode: status){ statusNew, answerOnRequestNew in
+                status = statusNew; answerOnRequest = answerOnRequestNew
+            }
             let responseJSON = responseJSON as? [String:Any]
-            if httpStatus?.statusCode == 200 {
+            if status == 200 {
                 let toUser = (responseJSON!["toUser"] as! Dictionary<String, String>)["id"]
                 let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
                 messages.append(Message(id: responseJSON?["id"] as! String, text: responseJSON?["text"] as! String, delivered: responseJSON?["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: type))
                 group.leave()
             }
-            else if httpStatus?.statusCode == 404 {
+            else if status == 404 {
                 answerOnRequest = "У контакта нет сообщений!"
                 group.leave()
             }
         }
-        return (status, answerOnRequest)
+        completion(status, answerOnRequest)
     }
     
     func isodateFromString(_ isoString: String) -> String {
@@ -364,7 +440,7 @@ class ContactStorage: ContactStorageProtocol {
     
     //MARK: вывод на TableViewController элементов
     func showAlertMessage (_ myTitle: String, _ myAnswer: String?, _ myController: UIViewController) {
-        let alert = UIAlertController(title: myTitle, message: myAnswer ?? "Неизвестный ответ от сервера", preferredStyle: .alert)
+        let alert = UIAlertController(title: myTitle, message: myAnswer, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         myController.present(alert, animated: true, completion: nil)
     }
