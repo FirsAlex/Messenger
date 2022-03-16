@@ -67,7 +67,7 @@ class ChatController: UIViewController {
         guard dataTextField.text != "" else { return }
         httpTimer.stop()
         sender.configuration?.showsActivityIndicator = true
-        contact.sendMessage(contactID: contactIndex, text: dataTextField.text){ [self] status, _ in
+        contact.sendMessage(contactIdInner: contactIndex, text: dataTextField.text){ [self] status, _ in
             if status == 200 {
                 dataTextField.text = ""
                 tableView.reloadData()
@@ -79,7 +79,7 @@ class ChatController: UIViewController {
     }
 
     func loadMessages(delivered: String) {
-        contact.getMessage(contactID: contactIndex, delivered: delivered){ [self] status, _ in
+        contact.getMessage(contactIdInner: contactIndex, delivered: delivered){ [self] status, _ in
             tableView.reloadData()
             if status == 200 {
                 if delivered == "all" { tableView.scrollToBottom() }
