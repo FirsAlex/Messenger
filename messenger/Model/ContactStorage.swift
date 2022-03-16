@@ -30,7 +30,7 @@ protocol ContactStorageProtocol {
     func sendMessageToDB(contactID: String, text: String,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
     func getLastMessageContacts(contactID: Int,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
-    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
+    func getLastMessageContactsFromDB(contactID: String,_ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ())
     
     func isodateFromString(_ isoString: String) -> String
 }
@@ -389,23 +389,23 @@ class ContactStorage: ContactStorageProtocol {
             answerOnRequest = sql.answerOnRequestError(statusCode: status)
             let responseJSON = responseJSON as? [String:Any]
             if status == 200 {
-                getLastMessageContactsFromDB(group: groupWaitResponseHttp, contactID: responseJSON?["id"] as! String){ statusNew, answerOnRequestNew in
+                getLastMessageContactsFromDB(contactID: responseJSON?["id"] as! String){ statusNew, answerOnRequestNew in
                     status = statusNew; answerOnRequest = answerOnRequestNew
+                    groupWaitResponseHttp.leave()
                 }
             }
-            else if status == 404 {
-                answerOnRequest = "Контакт не зарегистрирован в системе!"
-                groupWaitResponseHttp.leave()
-            }
+            else { groupWaitResponseHttp.leave() }
         }
         groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
             completion(status, answerOnRequest)
         }
     }
     
-    func getLastMessageContactsFromDB(group: DispatchGroup, contactID: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
+    func getLastMessageContactsFromDB(contactID: String, _ completion: @escaping (_ statusNew: Int?, _ answerOnRequestNew: String?) -> ()) {
         var answerOnRequest: String?
         var status: Int?
+        let groupWaitResponseHttp = DispatchGroup()
+        groupWaitResponseHttp.enter()
         sql.sendRequest("messages/last_between_users?userID=" + (myUser?.id ?? "") + "&contactID=" + contactID + "&delivered=all", [:], "GET") { [self] httpStatus,responseJSON in
             status = httpStatus?.statusCode
             answerOnRequest = sql.answerOnRequestError(statusCode: status)
@@ -415,11 +415,10 @@ class ContactStorage: ContactStorageProtocol {
                 let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
                 messages.append(Message(id: responseJSON?["id"] as! String, text: responseJSON?["text"] as! String, delivered: responseJSON?["delivered"] as! Bool, contactID: contactID, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: type))
             }
-            else if status == 404 {
-                answerOnRequest = "У контакта нет сообщений!"
-            }
+            groupWaitResponseHttp.leave()
+        }
+        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
             completion(status, answerOnRequest)
-            group.leave()
         }
     }
     

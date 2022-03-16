@@ -48,6 +48,7 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
+        loadLastMessages()
         print("Chats - viewWillAppear")
     }
     
@@ -117,10 +118,10 @@ class ChatsUserController: UITableViewController {
     
     func loadLastMessages() {
         guard contact.contacts.count != 0 else { return }
-        contact.messages = []
         for contactIndex in (0..<contact.contacts.count) {
-            contact.getLastMessageContacts(contactID: contactIndex){ status,answerOnRequest in}
-            tableView.reloadData()
+            contact.getLastMessageContacts(contactID: contactIndex){ [self] statusNew, answerOnRequestNew in
+                if statusNew == 200 { tableView.reloadData() }
+            }
         }
     }
 
