@@ -153,6 +153,7 @@ class ChatsUserController: UITableViewController {
         }
         else if message.type == .incomming {
             chatsCell.lastMessage.text = message.text
+            chatsCell.symbol.text = ""
         }
   
         return chatsCell
