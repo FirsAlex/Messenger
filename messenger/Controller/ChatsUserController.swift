@@ -25,6 +25,7 @@ class ChatsUserController: UITableViewController {
                         contact.showAlertMessage("Загрузка контактов", answerOnRequest, self)
                     }
                 }
+                loadLastMessages()
             }
         }
         print("Chats - loadView")
@@ -41,6 +42,7 @@ class ChatsUserController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController!.isToolbarHidden = true
+        contact.messages = []
         print("Chats - viewWillDisappear")
     }
     
@@ -48,7 +50,6 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
-        loadLastMessages()
         print("Chats - viewWillAppear")
     }
     
@@ -119,7 +120,7 @@ class ChatsUserController: UITableViewController {
     func loadLastMessages() {
         guard contact.contacts.count != 0 else { return }
         for contactIndex in (0..<contact.contacts.count) {
-            contact.getLastMessageContacts(contactID: contactIndex){ [self] statusNew, answerOnRequestNew in
+            contact.getLastMessageContacts(contactIdInner: contactIndex){ [self] statusNew, answerOnRequestNew in
                 if statusNew == 200 { tableView.reloadData() }
             }
         }
@@ -140,7 +141,7 @@ class ChatsUserController: UITableViewController {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
         let message = contact.messages[indexPath.row]
         
-        //chatsCell.nameContact.text = contact.contacts[].name
+        chatsCell.nameContact.text = contact.contacts[message.contactIdInner!].name
         chatsCell.lastMessageTime.text = message.createdAt
         if (message.type == .outgoing) {
             chatsCell.lastMessage.text = "Вы: " + message.text
