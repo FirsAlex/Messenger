@@ -306,6 +306,7 @@ class ContactStorage: ContactStorageProtocol {
                         groupWaitResponseHttp.leave()
                     }
                 }
+                else { status = 404; groupWaitResponseHttp.leave() }
             }
             else { groupWaitResponseHttp.leave() }
         }

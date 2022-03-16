@@ -80,8 +80,8 @@ class ChatController: UIViewController {
 
     func loadMessages(delivered: String) {
         contact.getMessage(contactID: contactIndex, delivered: delivered){ [self] status, _ in
-            tableView.reloadData()
             if status == 200 {
+                tableView.reloadData()
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }
