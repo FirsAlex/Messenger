@@ -12,7 +12,6 @@ class ChatController: UIViewController {
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var constraintTopTable: NSLayoutConstraint!
     @IBOutlet weak var dataTextField: UITextView!
-    let groupWaitResponseHttp = DispatchGroup()
     
     var contact = ContactStorage.shared
     var contactIndex: Int!
@@ -66,11 +65,9 @@ class ChatController: UIViewController {
     // отправка
     @IBAction func send(_ sender: UIButton) {
         guard dataTextField.text != "" else { return }
-        groupWaitResponseHttp.enter()
         httpTimer.stop()
         sender.configuration?.showsActivityIndicator = true
-        let (status, _) = contact.sendMessage(group: groupWaitResponseHttp, contactID: contactIndex, text: dataTextField.text)
-        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+        contact.sendMessage(contactID: contactIndex, text: dataTextField.text){ [self] status, _ in
             if status == 200 {
                 dataTextField.text = ""
                 tableView.reloadData()
@@ -82,14 +79,9 @@ class ChatController: UIViewController {
     }
 
     func loadMessages(delivered: String) {
-        var checkMessage = false
-        groupWaitResponseHttp.enter()
-        (_,_) = contact.getMessage(group: groupWaitResponseHttp, contactID: contactIndex, delivered: delivered){
-            checkMessage = true
-        }
-        groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
+        contact.getMessage(contactID: contactIndex, delivered: delivered){ [self] status, _ in
             tableView.reloadData()
-            if checkMessage {
+            if status == 200 {
                 if delivered == "all" { tableView.scrollToBottom() }
                 else if delivered == "falseIncomming" { tableView.scrollToBottom(isAnimated: true) }
             }

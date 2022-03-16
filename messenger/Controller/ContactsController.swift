@@ -8,7 +8,6 @@
 import UIKit
 
 class ContactsController: UITableViewController {
-    let groupWaitResponseHttp = DispatchGroup()
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
     
@@ -86,17 +85,19 @@ class ContactsController: UITableViewController {
             spinner = contact.startSpinner("Сохранение", self)
             // создаем новый контакт
             if name != "" && telephone != "" {
-                groupWaitResponseHttp.enter()
-                (_, answerOnRequest) = (contactID == nil) ?
-                contact.saveContactToDB(group: groupWaitResponseHttp, telephone: telephone, name: name) :
-                contact.updateContactFromDB(group: groupWaitResponseHttp, telephone: telephone, name: name, contactID: contactID!)
+                (contactID == nil) ?
+                contact.saveContactToDB(telephone: telephone, name: name){ _, answerOnRequestNew in
+                    answerOnRequest = answerOnRequestNew
+                    tableView.reloadData()
+                    spinner?.dismiss(animated: true){ contact.showAlertMessage("Результат сохранения", answerOnRequest, self) }
+                } :
+                contact.updateContactFromDB(telephone: telephone, name: name, contactID: contactID!){ _, answerOnRequestNew in
+                    answerOnRequest = answerOnRequestNew
+                    tableView.reloadData()
+                    spinner?.dismiss(animated: true){ contact.showAlertMessage("Результат обновления", answerOnRequest, self) }
+                }
             }
-            else { answerOnRequest = "Одно из обязательных полей не заполнено!" }
-            
-            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", answerOnRequest, self)})
-                tableView.reloadData()
-            }
+            else { spinner?.dismiss(animated: true){ contact.showAlertMessage("Сохранение", "Одно из обязательных полей не заполнено!", self)} }
         }
         // кнопка отмены
         let cancelButton = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
@@ -113,12 +114,10 @@ class ContactsController: UITableViewController {
         // действие удаления
         let actionDelete = UIContextualAction(style: .destructive, title: "\u{1F5D1}") { [self] _,_,_ in
             spinner = contact.startSpinner("Удаление", self)
-            groupWaitResponseHttp.enter()
-            (_, answerOnRequest) = contact.deleteContactFromDB(group: groupWaitResponseHttp, contactID: indexPath.row)
-            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-                // удаляем строку, соответствующую задаче
-                spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Удаление", answerOnRequest, self)})
+            contact.deleteContactFromDB(contactID: indexPath.row){ _, answerOnRequestNew in
+                answerOnRequest = answerOnRequestNew
                 tableView.reloadData()
+                spinner?.dismiss(animated: true){contact.showAlertMessage("Удаление", answerOnRequest, self)}
             }
         }
         // действие изменить

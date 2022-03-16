@@ -10,24 +10,21 @@ import UIKit
 class ChatsUserController: UITableViewController {
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
-    let groupWaitResponseHttp = DispatchGroup()
     
     override func loadView() {
-        super.loadView()
+        super.loadView()        
         contact.loadMyUser()
-        if self.contact.myUser == nil {
+        if contact.myUser == nil {
             showMyContact()
         }
         else {
             spinner = contact.startSpinner("Загрузка контактов", self)
-            contact.loadContactsFromDB(group: groupWaitResponseHttp){status, answerOnRequest in
+            contact.loadContactsFromDB(){ [self] status, answerOnRequest in
                 spinner?.dismiss(animated: true){ [self] in
                     if status != 200 {
                         contact.showAlertMessage("Загрузка контактов", answerOnRequest, self)
                     }
                 }
-            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) {
-            }
             }
         }
         print("Chats - loadView")
@@ -90,21 +87,24 @@ class ChatsUserController: UITableViewController {
             // создаем новый контакт
             if name != "" && telephone != "" {
                 if contact.myUser == nil {
-                    contact.getMyUserFromDB(telephone: telephone, name: name){ _, answerOnRequestNew in
+                    contact.getMyUserFromDB(telephone: telephone){ statusNew, answerOnRequestNew in
                         answerOnRequest = answerOnRequestNew
+                        if statusNew == 200 {
+                            contact.loadContactsFromDB(){ _, answer in answerOnRequest! += "" + answer! }
+                        }
+                        else if statusNew == 404 {
+                            contact.postMyUserToDB(telephone: telephone, name: name){ _, answer in answerOnRequest = answer}
+                        }
+                        spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Результат загрузки", answerOnRequest, self)})
                     }
                 }
                 else {
-                    contact.patchMyUserFromDB(telephone: telephone, name: name){ _, answerOnRequestNew in
-                        answerOnRequest = answerOnRequestNew
+                    contact.patchMyUserFromDB(telephone: telephone, name: name){ _, answer in answerOnRequest = answer
+                        spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Результат обновления", answerOnRequest, self)})
                     }
                 }
             }
-            else {
-                answerOnRequest = "Одно из обязательных полей не заполнено!"
-            }
-        
-            spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", answerOnRequest, self)})
+            else { spinner?.dismiss(animated: true, completion: {contact.showAlertMessage("Сохранение", "Не заполнено обязательное поле!", self)})}
         }
         // кнопка отмены
         let cancelButton = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
@@ -119,11 +119,8 @@ class ChatsUserController: UITableViewController {
         guard contact.contacts.count != 0 else { return }
         contact.messages = []
         for contactIndex in (0..<contact.contacts.count) {
-            groupWaitResponseHttp.enter()
-            contact.getLastMessageContacts(group: groupWaitResponseHttp, contactID: contactIndex)
-            groupWaitResponseHttp.notify(qos: .userInteractive, queue: .main) { [self] in
-                tableView.reloadData()
-            }
+            contact.getLastMessageContacts(contactID: contactIndex){ status,answerOnRequest in}
+            tableView.reloadData()
         }
     }
 
