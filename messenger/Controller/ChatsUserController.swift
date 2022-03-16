@@ -145,7 +145,7 @@ class ChatsUserController: UITableViewController {
         chatsCell.nameContact.text = contact.contacts[message.contactIdInner!].name
         chatsCell.lastMessageTime.text = message.createdAt
         if (message.type == .outgoing) {
-            chatsCell.lastMessage.text = "Вы: " + message.text
+            chatsCell.lastMessage.text = message.text
             if message.delivered {
                 chatsCell.symbol.attributedText = NSAttributedString(string: "\u{2713}\u{2713}", attributes: [.kern: -6])
             }
