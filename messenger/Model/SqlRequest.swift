@@ -40,6 +40,7 @@ class SqlRequest: SqlRequestProtocol{
             //print("Answer in request: \(String(describing: response))")
             guard let data = data, error == nil else {
                 print(error?.localizedDescription ?? "No data")
+                completion(httpStatus, responseJSON)
                 return
             }
             
