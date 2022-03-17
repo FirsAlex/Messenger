@@ -25,6 +25,7 @@ class ChatsUserController: UITableViewController {
                         contact.showAlertMessage("Загрузка контактов", answerOnRequest, self)
                     }
                 }
+                loadLastMessages()
             }
         }
         print("Chats - loadView")
@@ -48,12 +49,12 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
+        loadLastMessages()
         print("Chats - viewWillAppear")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        loadLastMessages()
         print("Chats - viewDidAppear")
     }
     
