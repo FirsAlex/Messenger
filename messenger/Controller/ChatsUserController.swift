@@ -10,6 +10,7 @@ import UIKit
 class ChatsUserController: UITableViewController {
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
+    var httpTimer = MyTimer()
     
     override func loadView() {
         super.loadView()        
@@ -25,7 +26,6 @@ class ChatsUserController: UITableViewController {
                         contact.showAlertMessage("Загрузка контактов", answerOnRequest, self)
                     }
                 }
-                loadLastMessages()
             }
         }
         print("Chats - loadView")
@@ -42,6 +42,7 @@ class ChatsUserController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController!.isToolbarHidden = true
+        httpTimer.stop()
         print("Chats - viewWillDisappear")
     }
     
@@ -49,8 +50,13 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
-        loadLastMessages()
+        httpTimer.start { self.loadLastMessages() }
         print("Chats - viewWillAppear")
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("Chats - viewDidAppear")
     }
     
     //MARK: кнопка edit в режиме редактирования
@@ -63,6 +69,17 @@ class ChatsUserController: UITableViewController {
         else {
             self.editButtonItem.title = "Применить"
         }
+    }
+    
+    //MARK: подгрузка последних сообщений с контактами
+    func loadLastMessages() {
+        guard contact.contacts.count != 0 else { return }
+        contact.messagesLast = []
+        for contactIndex in (0..<contact.contacts.count) {
+            contact.getLastMessageContacts(contactIdInner: contactIndex){ statusNew, answerOnRequestNew in
+            }
+        }
+        tableView.reloadData()
     }
     
     // MARK: создание учётной записи или загрузка текущей с сервера
@@ -116,15 +133,6 @@ class ChatsUserController: UITableViewController {
         // отображаем Alert Controller
         self.present(alertController, animated: true)
     }
-    
-    func loadLastMessages() {
-        guard contact.contacts.count != 0 else { return }
-        for contactIndex in (0..<contact.contacts.count) {
-            contact.getLastMessageContacts(contactIdInner: contactIndex){ [self] statusNew, answerOnRequestNew in
-                if statusNew == 200 { tableView.reloadData() }
-            }
-        }
-    }
 
     // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -134,13 +142,13 @@ class ChatsUserController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return contact.messagesCount
+        return contact.messagesLast.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
-        let message = contact.messages[indexPath.row]
-        print(contact.messages.count)
+        let message = contact.messagesLast[indexPath.row]
+ 
         chatsCell.nameContact.text = contact.contacts[message.contactIdInner!].name
         chatsCell.lastMessageTime.text = message.createdAt
         if (message.type == .outgoing) {
@@ -161,7 +169,7 @@ class ChatsUserController: UITableViewController {
     //MARK: обработка выделения строки
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let chatScreen = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ChatController") as! ChatController
-        chatScreen.contactIndex = contact.messages[indexPath.row].contactIdInner
+        chatScreen.contactIndex = contact.messagesLast[indexPath.row].contactIdInner
         // переход к экрану редактирования
         self.navigationController?.pushViewController(chatScreen, animated: true)
     }

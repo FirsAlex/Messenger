@@ -41,9 +41,7 @@ class ContactStorage: ContactStorageProtocol {
     
     var contacts: [UserProtocol] = []
     var messages: [MessageProtocol] = []
-    var messagesCount: Int {
-        return messages.count
-    }
+    var messagesLast: [MessageProtocol] = []
     
     var myUser: UserProtocol? {
         didSet {
@@ -416,7 +414,7 @@ class ContactStorage: ContactStorageProtocol {
             if status == 200 {
                 let toUser = (responseJSON!["toUser"] as! Dictionary<String, String>)["id"]
                 let type = toUser == (myUser?.id ?? "") ? MessageType.incomming : MessageType.outgoing
-                messages.append(Message(id: responseJSON?["id"] as! String, text: responseJSON?["text"] as! String, delivered: responseJSON?["delivered"] as! Bool, contactIdBD: contactIdBD, contactIdInner: contactIdInner, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: type))
+                messagesLast.append(Message(id: responseJSON?["id"] as! String, text: responseJSON?["text"] as! String, delivered: responseJSON?["delivered"] as! Bool, contactIdBD: contactIdBD, contactIdInner: contactIdInner, createdAt: isodateFromString(responseJSON?["createdAt"] as! String), type: type))
             }
             groupWaitResponseHttp.leave()
         }
