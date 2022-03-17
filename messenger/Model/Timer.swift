@@ -10,8 +10,8 @@ import Foundation
 class MyTimer {
     weak var timer: Timer?
     
-    func start(_ completion: @escaping() -> Void) {
-        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true){ timer in
+    func start(interval: Double, _ completion: @escaping() -> Void) {
+        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true){ timer in
             completion()
         }
         //работа Timer при взаимодействии с интерфейсом

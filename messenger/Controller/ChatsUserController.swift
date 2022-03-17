@@ -10,7 +10,6 @@ import UIKit
 class ChatsUserController: UITableViewController {
     var spinner: UIAlertController?
     var contact = ContactStorage.shared
-    var httpTimer = MyTimer()
     
     override func loadView() {
         super.loadView()        
@@ -42,7 +41,6 @@ class ChatsUserController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController!.isToolbarHidden = true
-        httpTimer.stop()
         print("Chats - viewWillDisappear")
     }
     
@@ -50,7 +48,7 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
-        httpTimer.start { self.loadLastMessages() }
+        loadLastMessages()
         print("Chats - viewWillAppear")
     }
     
@@ -76,10 +74,10 @@ class ChatsUserController: UITableViewController {
         guard contact.contacts.count != 0 else { return }
         contact.messagesLast = []
         for contactIndex in (0..<contact.contacts.count) {
-            contact.getLastMessageContacts(contactIdInner: contactIndex){ statusNew, answerOnRequestNew in
+            contact.getLastMessageContacts(contactIdInner: contactIndex){ [self] statusNew, answerOnRequestNew in
+                if statusNew == 200 { tableView.reloadData() }
             }
         }
-        tableView.reloadData()
     }
     
     // MARK: создание учётной записи или загрузка текущей с сервера
@@ -148,7 +146,7 @@ class ChatsUserController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
         let message = contact.messagesLast[indexPath.row]
- 
+
         chatsCell.nameContact.text = contact.contacts[message.contactIdInner!].name
         chatsCell.lastMessageTime.text = message.createdAt
         if (message.type == .outgoing) {

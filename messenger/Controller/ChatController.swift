@@ -36,7 +36,7 @@ class ChatController: UIViewController {
         registerForKeyboardNotifications()
         contact.messages = []
         loadMessages(delivered: "all")
-        httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
+        httpTimer.start(interval: 2.0) { self.loadMessages(delivered: "falseIncomming") }
         print("ChatController - viewDidLoad")
     }
     
@@ -74,7 +74,7 @@ class ChatController: UIViewController {
                 tableView.scrollToBottom(isAnimated: true)
             }
             sender.configuration?.showsActivityIndicator = false
-            httpTimer.start { self.loadMessages(delivered: "falseIncomming") }
+            httpTimer.start(interval: 2.0){ self.loadMessages(delivered: "falseIncomming") }
         }
     }
 
