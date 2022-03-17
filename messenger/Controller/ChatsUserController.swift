@@ -118,14 +118,12 @@ class ChatsUserController: UITableViewController {
     }
     
     func loadLastMessages() {
-        var checkTableReload: false
         guard contact.contacts.count != 0 else { return }
         for contactIndex in (0..<contact.contacts.count) {
             contact.getLastMessageContacts(contactIdInner: contactIndex){ [self] statusNew, answerOnRequestNew in
-                 if (statusNew == 200) { checkTableReload = true }
+                if statusNew == 200 { tableView.reloadData() }
             }
         }
-        if checkTableReload { tableView.reloadData() }
     }
 
     // MARK: - Table view data source
