@@ -158,5 +158,13 @@ class ChatsUserController: UITableViewController {
   
         return chatsCell
     }
+    
+    //MARK: обработка выделения строки
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let chatScreen = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ChatController") as! ChatController
+        chatScreen.contactIndex = contact.messages[indexPath.row].contactIdInner
+        // переход к экрану редактирования
+        self.navigationController?.pushViewController(chatScreen, animated: true)
+    }
 
 }
