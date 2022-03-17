@@ -42,7 +42,6 @@ class ChatsUserController: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController!.isToolbarHidden = true
-        contact.messages = []
         print("Chats - viewWillDisappear")
     }
     
@@ -119,12 +118,14 @@ class ChatsUserController: UITableViewController {
     }
     
     func loadLastMessages() {
+        var checkTableReload: false
         guard contact.contacts.count != 0 else { return }
         for contactIndex in (0..<contact.contacts.count) {
             contact.getLastMessageContacts(contactIdInner: contactIndex){ [self] statusNew, answerOnRequestNew in
-                if statusNew == 200 { tableView.reloadData() }
+                 if (statusNew == 200) { checkTableReload = true }
             }
         }
+        if checkTableReload { tableView.reloadData() }
     }
 
     // MARK: - Table view data source
