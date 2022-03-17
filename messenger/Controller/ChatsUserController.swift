@@ -49,7 +49,6 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
-        contact.messages = []
         loadLastMessages()
         print("Chats - viewWillAppear")
     }
@@ -135,13 +134,13 @@ class ChatsUserController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return contact.messages.count
+        return contact.messagesCount
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let chatsCell = tableView.dequeueReusableCell(withIdentifier: "ChatsCell", for: indexPath) as! ChatsCell
         let message = contact.messages[indexPath.row]
-        
+        print(contact.messages.count)
         chatsCell.nameContact.text = contact.contacts[message.contactIdInner!].name
         chatsCell.lastMessageTime.text = message.createdAt
         if (message.type == .outgoing) {

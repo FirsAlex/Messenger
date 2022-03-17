@@ -54,6 +54,7 @@ class ChatController: UIViewController {
         super.viewWillDisappear(animated)
         removeForKeyboardNotifications()
         httpTimer.stop()
+        contact.messages = []
         print("ChatController - viewWillDisappear")
     }
     
@@ -121,7 +122,7 @@ extension ChatController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section:Int) -> Int {
-        return contact.messages.count
+        return contact.messagesCount
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

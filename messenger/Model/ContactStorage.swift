@@ -41,6 +41,9 @@ class ContactStorage: ContactStorageProtocol {
     
     var contacts: [UserProtocol] = []
     var messages: [MessageProtocol] = []
+    var messagesCount: Int {
+        return messages.count
+    }
     
     var myUser: UserProtocol? {
         didSet {
