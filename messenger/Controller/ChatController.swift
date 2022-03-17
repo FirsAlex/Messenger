@@ -54,7 +54,6 @@ class ChatController: UIViewController {
         super.viewWillDisappear(animated)
         removeForKeyboardNotifications()
         httpTimer.stop()
-        contact.messages = []
         print("ChatController - viewWillDisappear")
     }
     

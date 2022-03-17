@@ -49,6 +49,7 @@ class ChatsUserController: UITableViewController {
         self.navigationController!.isToolbarHidden = false
         self.editButtonItem.title = "Изменить"
         self.navigationItem.leftBarButtonItem = self.editButtonItem
+        contact.messages = []
         loadLastMessages()
         print("Chats - viewWillAppear")
     }
